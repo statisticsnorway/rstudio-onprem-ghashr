@@ -27,15 +27,15 @@ variables:
     # Mandatory
     # The fully qualified name of the Docker image e.g. eu.gcr.io/prod-bip/ssb/stratus/am-hello-world
   - name: imageName
-    value: 'eu.gcr.io/prod-bip/ssb/S782/rstudio-onprem'
+    value: 'eu.gcr.io/prod-bip/ssb/s782/rstudio-onprem'
 
   - name: imageNameNexus
-    value: 'nexus.ssb.no:8437/prod-bip/ssb/S782/rstudio-onprem'
+    value: 'nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem'
 
     # Mandatory
     # The fully qualified name of the image repository e.g. prod-bip/ssb/stratus/am-hello-world
   - name: repoName
-    value: 'prod-bip/ssb/S782/rstudio-onprem'
+    value: 'prod-bip/ssb/s782/rstudio-onprem'
 
     # This should be left as default for most cases. Override if you have a particular reason.
   - name: timeBetweenRetriesVulnerabilityScan
@@ -146,7 +146,7 @@ jobs:
           TAG=`git describe --tags`
           echo "Found tag $TAG"
 
-          printf "DOCKER_NOTEBOOK_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/S782/rstudio-onprem:$TAG" > docker/rstudio/.env
+          printf "DOCKER_NOTEBOOK_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
           
           IMAGE=${{ variables.imageNameNexus }}:$TAG
           echo "Pulling $IMAGE"
