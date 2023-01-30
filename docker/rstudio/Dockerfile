@@ -116,22 +116,6 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 #    #curl --silent -L -o- https://github.com/jdemetra/jwsacruncher/releases/download/v2.2.3/jwsacruncher-2.2.3-bin.zip | bsdtar -xvf- -C /opt && \
 #    unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && fix-permissions /opt/jwsacruncher-2.2.4 && rm -f /tmp/jwsacruncher-2.2.4.zip && \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
-#   ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
-
-# Set localtime to Europe/Oslo
-RUN rm -f /etc/localtime && \
-    ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime
-
-# adding a custom bashrc with git branch in PS1
-COPY default-bashrc /etc/skel/.bashrc
-
-COPY check-git-config.bash /usr/local/bin/check-git-config.sh
-RUN chmod +x /usr/local/bin/check-git-config.sh
-
-# Install ssb-gitconfig.py script
-RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
-RUN chmod +x /usr/local/bin/ssb-gitconfig.py
-
 
 EXPOSE 8787
 
