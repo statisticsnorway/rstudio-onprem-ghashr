@@ -146,7 +146,7 @@ jobs:
           TAG=`git describe --tags`
           echo "Found tag $TAG"
 
-          printf "DOCKER_NOTEBOOK_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
+          printf "DOCKER_RSTUDIO_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
           
           IMAGE=${{ variables.imageNameNexus }}:$TAG
           echo "Pulling $IMAGE"
