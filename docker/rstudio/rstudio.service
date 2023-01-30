@@ -6,7 +6,7 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-User=jupyterhub
+User=rstudio
 WorkingDirectory=/home/rstudio/rstudio-onprem/docker/rstudio
 ExecStart=/usr/local/bin/docker-compose -f docker-compose.yml up -d
 ExecStop=/usr/local/bin/docker-compose -f docker-compose.yml stop
