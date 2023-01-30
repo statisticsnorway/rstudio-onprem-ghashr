@@ -83,8 +83,6 @@ jobs:
     dependsOn: dockerBuildAndDockerPush
     pool:
       name: rstudio-onprem-staging
-      demands:
-      - agent.name -startsWith 'staging'
 
     displayName: "Deploying to staging"
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
@@ -126,8 +124,6 @@ jobs:
     dependsOn: dockerBuildAndDockerPush
     pool:
       name: rstudio-onprem-prod
-      demands:
-      - agent.name -startsWith 'prod'
 
     displayName: "Deploying to prod"
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
