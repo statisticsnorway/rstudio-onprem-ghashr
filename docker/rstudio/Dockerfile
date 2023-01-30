@@ -8,6 +8,7 @@ USER root
 RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
+    && apt-get -y instal wget \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
     software-properties-common dirmngr build-essential curl libssl-dev libcurl4-openssl-dev libgdal-dev libre2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev \
@@ -15,7 +16,7 @@ RUN apt-get update -y \
     # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
     # Fingerprint: 298A3A825C0D65DFD57CBB651716619E084DAB9
     && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc \
-    | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
+    | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
     # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
     && add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     && gpg-agent --daemon \
