@@ -39,8 +39,20 @@ ENV RSTUDIO_VERSION=2022.07.2+576
 ENV DEFAULT_USER=rstudio
 ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
-ENV LD_LIBRARY_PATH="/usr/lib/oracle/21.8/client64/lib:${LD_LIBRARY_PATH}"
 
+ENV R_HOME /usr/lib/R
+ENV R_LIBS_USER /usr/lib/R/library
+
+# Setting up environment variables for oracle and R
+ENV OCI_INC=/usr/include/oracle/21/client64
+ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
+ENV ORACLE_HOME=/usr/lib/oracle/21/client64
+ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/21/client64/lib
+
+# https://cran.r-project.org/web/packages/arrow/vignettes/install.html
+ENV NOT_CRAN true
+ENV ARROW_GCS=ON
 
 RUN /rocker_scripts/install_rstudio.sh && \
     /rocker_scripts/install_pandoc.sh && \
@@ -51,6 +63,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get -y update && \
     # alien is a helper to install oracle instantclient
     apt-get install -y --no-install-recommends alien && \
+    apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1
 
 # Downloading oracle instant-client components and saving to /tmp
@@ -70,10 +83,6 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
     rm -rf /tmp/oracle-instantclient-*
 
-# https://cran.r-project.org/web/packages/arrow/vignettes/install.html
-ENV NOT_CRAN true
-ENV ARROW_GCS=ON
-
 COPY r-packages.txt /tmp/r-packages.txt
 
 RUN apt-get update -y && \
@@ -90,6 +99,7 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Setup R java support and install R packages that are not available as Ubuntu packages
 RUN R CMD javareconf -e && \
+    R -e "install.packages('ROracle', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('RTextTools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('configr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('SSBtools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
@@ -125,6 +135,41 @@ RUN R CMD javareconf -e && \
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
     ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+
+# add tnsnames.ora to oracle path
+RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
+
+# Allowing usage of stamme_variabler in the terminal
+# stamme_variabler is also useable in the kernels as
+# the file is sourced before the kernels start
+RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
+
+RUN mkdir -p /usr/local/share/etc/
+COPY bashrc.felles /usr/local/share/etc/bashrc.felles
+
+# Change default R repo
+COPY Rprofile.site /etc/R/Rprofile.site
+
+# Set FELLES environment variable
+ENV FELLES=/ssb/bruker/felles
+
+# Use proxy for https connections
+ENV https_proxy=http://proxy.ssb.no:3128
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no
+
+# Set localtime to Europe/Oslo
+RUN rm -f /etc/localtime && \
+    ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime
+
+# adding a custom bashrc with git branch in PS1
+COPY default-bashrc /etc/skel/.bashrc
+
+COPY check-git-config.bash /usr/local/bin/check-git-config.sh
+RUN chmod +x /usr/local/bin/check-git-config.sh
+
+# Install ssb-gitconfig.py script
+RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
+RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
 EXPOSE 8787
 
