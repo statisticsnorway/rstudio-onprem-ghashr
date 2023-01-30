@@ -90,36 +90,36 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Setup R java support and install R packages that are not available as Ubuntu packages
 RUN R CMD javareconf -e && \
-    R -e "install.packages('RTextTools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('configr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('SSBtools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('RegSDC', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('oysteR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('writexl', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('concaveman', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('cppRouting', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('rjwsacruncher', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('klassR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('antiword', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('textshape', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('striprtf', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('textreadr', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('terra', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('raster', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('leaflet', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('languageserver', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('sotkanet', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('ggiraph', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('dcmodify', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('simputation', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
+    R -e "install.packages('RTextTools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('configr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('SSBtools', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('RegSDC', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('oysteR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('writexl', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('concaveman', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('cppRouting', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('rjwsacruncher', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('klassR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('antiword', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('textshape', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('striprtf', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('textreadr', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('terra', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('raster', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('leaflet', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('languageserver', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('sotkanet', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('ggiraph', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('dcmodify', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('simputation', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "library(rio); install_formats()" && \
     R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('r-barnes/dggridR', vignette=TRUE)" && \
     R -e "remotes::install_github('statisticsnorway/Kostra')" && \
     R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
     R -e "remotes::install_github('statisticsnorway/struktuR')" && \
-    R -e "install.packages('dotenv', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
-    R -e "install.packages('PriceIndices', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest)" && \
+    R -e "install.packages('dotenv', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('PriceIndices', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('sfarrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
     # Doesn t work with Java11 - use a custom one
