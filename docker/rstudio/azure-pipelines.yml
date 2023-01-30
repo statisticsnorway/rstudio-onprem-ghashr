@@ -83,8 +83,10 @@ jobs:
     dependsOn: dockerBuildAndDockerPush
     pool:
       name: rstudio-onprem-staging
+      demands:
+      - agent.name -equals staging-agent-1
 
-    displayName: "Deploying to staging"
+    displayName: "Deploying to sl-rstudio-t1 (staging)"
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     steps:
       - script: |
@@ -120,12 +122,14 @@ jobs:
               echo "starting service."
               sudo systemctl start rstudio.service
           fi
-  - job: deployToProd
+  - job: deployToProd_1
     dependsOn: dockerBuildAndDockerPush
     pool:
       name: rstudio-onprem-prod
+      demands:
+      - agent.name -equals prod-agent-1
 
-    displayName: "Deploying to prod"
+    displayName: "Deploying to sl-rstudio-p1 (prod)"
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     steps:
       - script: |
@@ -167,4 +171,53 @@ jobs:
               echo "starting service."
               sudo systemctl start rstudio.service
           fi
-      
+
+  - job: deployToProd_2
+    dependsOn: dockerBuildAndDockerPush
+    pool:
+      name: rstudio-onprem-prod
+      demands:
+      - agent.name -equals prod-agent-2
+
+    displayName: "Deploying to sl-rstudio-p2 (prod)"
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    steps:
+      - script: |
+          set -e
+          REPO="$HOME/rstudio-onprem"
+          if ! [ -d "$REPO" ]
+          then
+              echo "repo $REPO does not exist locally, cloning it."
+              git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
+          fi
+          
+          cd $REPO
+          git pull
+
+          echo "Getting the latest git tag"
+          git fetch --tags
+
+          TAG=`git describe --tags`
+          echo "Found tag $TAG"
+
+          printf "DOCKER_RSTUDIO_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
+          
+          IMAGE=${{ variables.imageNameNexus }}:$TAG
+          echo "Pulling $IMAGE"
+          docker pull $IMAGE
+
+          echo "Removing dangling images"
+          docker image prune --force
+
+          SERVICE_FILE=/etc/systemd/system/rstudio.service
+          if cmp -s -- "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
+              echo "Service files are the same, restarting service."
+              sudo systemctl restart rstudio.service
+          else
+              echo "Service file $SERVICE_FILE does not exist or is not equal to the recently pulled one."
+              sudo cp "$REPO/docker/rstudio/rstudio.service" "/etc/systemd/system/"
+              echo "enabling service."
+              sudo systemctl enable rstudio.service
+              echo "starting service."
+              sudo systemctl start rstudio.service
+          fi
