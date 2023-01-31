@@ -52,8 +52,8 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1
 
-ENV R_HOME /usr/lib/R
-ENV R_LIBS_USER /usr/lib/R/library
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
 
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
