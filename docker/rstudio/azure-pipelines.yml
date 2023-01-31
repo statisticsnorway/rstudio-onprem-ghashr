@@ -23,6 +23,9 @@ resources:
       name: statisticsnorway/azure-pipelines-templates
       endpoint: statisticsnorway
 
+pool:
+  name: 'extended_storage'
+
 variables:
     # Mandatory
     # The fully qualified name of the Docker image e.g. eu.gcr.io/prod-bip/ssb/stratus/am-hello-world
