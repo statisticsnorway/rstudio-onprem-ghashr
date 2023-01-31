@@ -1,7 +1,4 @@
 # Setting default repo globally
-home <- Sys.getenv("R_HOME")
-.libPaths(c(file.path(home, "lib"), .libPaths()))
-
 r <- getOption("repos")
 r["CRAN"] <- "https://nexus.ssb.no/repository/packagemanager-rstudio/"
 options(repos = r)
