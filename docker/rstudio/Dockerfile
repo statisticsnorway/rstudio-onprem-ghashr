@@ -153,10 +153,6 @@ COPY Rprofile.site /etc/R/Rprofile.site
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
 
-# Use proxy for https connections
-ENV https_proxy=http://proxy.ssb.no:3128
-ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no
-
 # Set localtime to Europe/Oslo
 RUN rm -f /etc/localtime && \
     ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime
@@ -170,6 +166,10 @@ RUN chmod +x /usr/local/bin/check-git-config.sh
 # Install ssb-gitconfig.py script
 RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
 RUN chmod +x /usr/local/bin/ssb-gitconfig.py
+
+# Use proxy for https connections, this must happen last
+ENV https_proxy=http://proxy.ssb.no:3128
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no
 
 EXPOSE 8787
 
