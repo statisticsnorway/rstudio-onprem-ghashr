@@ -1,30 +1,6 @@
 FROM rocker/r-ver:4.2.2
 
-ARG openjdk_version="17"
 USER root
-
-# We will install R and packages using instructions from https://cloud.r-project.org/
-# Should be installed into /usr/lib/R/site-library
-RUN apt-get update -y \
-    && apt-get -y upgrade \
-    && apt-get -y dist-upgrade \
-    && apt-get -y install wget \
-    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    software-properties-common dirmngr build-essential curl libssl-dev libcurl4-openssl-dev libgdal-dev libre2-dev \
-    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev \
-    # add the signing key (by Michael Rutter) for these repos
-    # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-    # Fingerprint: 298A3A825C0D65DFD57CBB651716619E084DAB9
-    && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc \
-    | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
-    # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
-    && add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
-    && gpg-agent --daemon \
-    # Get access to 5000+ CRAN Packages
-    && add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
-    && apt autoremove -y \
-    && apt-get -y clean all \
-    && rm -rf /var/lib/apt/lists/*
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -32,7 +8,8 @@ RUN apt update && \
     apt-get -y update && \
     apt-get -y upgrade && \
     apt-get -y dist-upgrade && \
-    apt-get -y install sssd-tools
+    apt-get -y install sssd-tools && \
+    apt-get -y install wget
 
 ENV S6_VERSION=v2.1.0.2
 ENV RSTUDIO_VERSION=2022.07.2+576
@@ -87,14 +64,11 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
 ENV NOT_CRAN true
 ENV ARROW_GCS=ON
 
-COPY r-packages.txt /tmp/r-packages.txt
-
 RUN apt-get update -y && \
     # vim support
     apt-get -y install vim && \
     # Installing bsdmainutils, helped solve colrm message after every command in the terminal
     apt-get install -y bsdmainutils && \
-    xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt && \
     apt autoremove -y && \
     apt-get -y clean all && \
     rm -rf /var/lib/apt/lists/*
