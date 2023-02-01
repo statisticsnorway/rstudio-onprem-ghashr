@@ -52,8 +52,12 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1
 
-ENV R_HOME /usr/lib/R
-ENV R_LIBS_USER /usr/lib/R/library
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
+
+# Change default R repo
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
@@ -146,9 +150,6 @@ RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
 
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
-
-# Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
 
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
