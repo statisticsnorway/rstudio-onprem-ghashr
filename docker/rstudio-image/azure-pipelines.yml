@@ -49,7 +49,7 @@ variables:
 
     # It's unusual to have a Dockerfile named anything else. This may be overridden for those unusual cases.
   - name: Dockerfile
-    value: 'docker/rstudio/Dockerfile'
+    value: 'docker/rstudio-image/Dockerfile'
 
 jobs:
   - job: dockerBuildAndDockerPush
