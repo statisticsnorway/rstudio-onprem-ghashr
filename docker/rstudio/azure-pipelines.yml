@@ -30,15 +30,15 @@ variables:
     # Mandatory
     # The fully qualified name of the Docker image e.g. eu.gcr.io/prod-bip/ssb/stratus/am-hello-world
   - name: imageName
-    value: 'eu.gcr.io/prod-bip/ssb/s782/rstudio-image-t-onprem'
+    value: 'eu.gcr.io/prod-bip/ssb/s782/rstudio-onprem'
 
   - name: imageNameNexus
-    value: 'nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-image-t-onprem'
+    value: 'nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem'
 
     # Mandatory
     # The fully qualified name of the image repository e.g. prod-bip/ssb/stratus/am-hello-world
   - name: repoName
-    value: 'prod-bip/ssb/s782/rstudio-image-t-onprem'
+    value: 'prod-bip/ssb/s782/rstudio-onprem'
 
     # This should be left as default for most cases. Override if you have a particular reason.
   - name: timeBetweenRetriesVulnerabilityScan
@@ -49,7 +49,7 @@ variables:
 
     # It's unusual to have a Dockerfile named anything else. This may be overridden for those unusual cases.
   - name: Dockerfile
-    value: 'docker/rstudio-image/Dockerfile'
+    value: 'docker/rstudio/Dockerfile'
 
 jobs:
   - job: dockerBuildAndDockerPush
@@ -85,7 +85,7 @@ jobs:
   - job: deployToStaging
     dependsOn: dockerBuildAndDockerPush
     pool:
-      name: jupyterhub-onprem-staging
+      name: rstudio-onprem-staging
       demands:
       - agent.name -equals staging-agent-1
 
@@ -113,17 +113,17 @@ jobs:
           cd $REPO
           git pull
             
-          SERVICE_FILE=/etc/systemd/system/jupyterhub.service
+          SERVICE_FILE=/etc/systemd/system/rstudio.service
           if cmp -s -- "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
               echo "Service files are the same, restarting service."
               sudo systemctl restart rstudio.service
           else
               echo "Service file $SERVICE_FILE does not exist or is not equal to the recently pulled one."
-              sudo cp "$REPO/docker/jupyterhub/jupyterhub.service" "/etc/systemd/system/"
+              sudo cp "$REPO/docker/rstudio/rstudio.service" "/etc/systemd/system/"
               echo "enabling service."
-              sudo systemctl enable jupyterhub.service
+              sudo systemctl enable rstudio.service
               echo "starting service."
-              sudo systemctl start jupyterhub.service
+              sudo systemctl start rstudio.service
           fi
   - job: deployToProd_1
     dependsOn: dockerBuildAndDockerPush

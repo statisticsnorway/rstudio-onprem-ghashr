@@ -1,0 +1,17 @@
+# JupyterHub docker-compose configuration file
+version: "2"
+
+services:
+  rstudio:
+    restart: always
+    image: ${DOCKER_RSTUDIO_IMAGE}
+    container_name: rstudio-server
+    volumes:
+        # Mounting ssb nfs shares
+      - "/ssb:/ssb"
+
+        # Mounting /var/lib/sss so we can use sssd users from host (REQUIRED FOR PAM AUTHENTICATION)
+      - "/var/lib/sss:/var/lib/sss"
+
+    ports:
+      - "8787:8787"

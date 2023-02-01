@@ -1,13 +1,13 @@
 [Unit]
-Description=Service file for jupyterhub
+Description=Service file for rstudio
 Requires=docker.service
 After=docker.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=true
-User=jupyterhub
-WorkingDirectory=/home/jupyterhub/jupyterhub-onprem/docker/jupyterhub
+User=rstudio
+WorkingDirectory=/home/rstudio/rstudio-onprem/docker/rstudio
 ExecStart=/usr/local/bin/docker-compose -f docker-compose.yml up -d
 ExecStop=/usr/local/bin/docker-compose -f docker-compose.yml stop
 
