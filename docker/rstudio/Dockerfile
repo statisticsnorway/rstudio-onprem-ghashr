@@ -1,6 +1,19 @@
 FROM rocker/r-ver:4.2.2
 
+ARG openjdk_version="17"
 USER root
+
+# We will install R and packages using instructions from https://cloud.r-project.org/
+# Should be installed into /usr/lib/R/site-library
+RUN apt-get update -y \
+    && apt-get -y upgrade \
+    && apt-get -y dist-upgrade \
+    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
+    software-properties-common dirmngr build-essential curl wget libssl-dev libcurl4-openssl-dev libgdal-dev libre2-dev \
+    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev \
+    && apt autoremove -y \
+    && apt-get -y clean all \
+    && rm -rf /var/lib/apt/lists/*
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
