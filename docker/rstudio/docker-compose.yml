@@ -14,7 +14,7 @@ services:
       - "/var/lib/sss:/var/lib/sss"
 
       # Mounting CA-certificate for github
-      - "~/cert_Decrypt-CA.pem:/usr/local/share/ca-certificate/cert_Decrypt-CA.crt"
+      - "~/cert_Decrypt-CA.pem:/usr/local/share/ca-certificates/cert_Decrypt-CA.crt"
 
     environment:
       STATBANK_ENCRYPT_URL: http://statbank-authenticator:8080/encrypt
