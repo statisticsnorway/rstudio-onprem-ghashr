@@ -33,12 +33,16 @@ ENV QUARTO_VERSION=default
 RUN /rocker_scripts/install_rstudio.sh && \
     /rocker_scripts/install_pandoc.sh && \
     /rocker_scripts/install_quarto.sh && \
-    /rocker_scripts/install_texlive.sh && \
+    #/rocker_scripts/install_texlive.sh && \
     /rocker_scripts/install_tensorflow.sh && \
     /rocker_scripts/install_tidyverse.sh && \
     apt-get -y update && \
+    # installing texlive via apt instead, the built in install_texlive doesnt supply everything
+    apt-get -y install texlive-full && \
     # alien is a helper to install oracle instantclient
     apt-get install -y --no-install-recommends alien && \
+    # installing yad (yet another dialog)
+    apt-get -y install yad && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1
 
@@ -134,7 +138,7 @@ RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tn
 # Allowing usage of stamme_variabler in the terminal
 # stamme_variabler is also useable in the kernels as
 # the file is sourced before the kernels start
-RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
+COPY stamme_variabel /etc/profile.d/stamme_variabel
 
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
@@ -158,8 +162,10 @@ RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
-ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,api.github.com,github.com
+
+COPY start.sh /start.sh
 
 EXPOSE 8787
 
-CMD ["/init"]
+CMD ["/start.sh"]

@@ -108,6 +108,8 @@ jobs:
           then
               echo "repo $REPO does not exist locally, cloning it."
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
+
+              mkdir -p $HOME/secrets/statbank-authenticator
           fi
 
           cd $REPO
@@ -142,6 +144,8 @@ jobs:
           then
               echo "repo $REPO does not exist locally, cloning it."
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
+
+              mkdir -p $HOME/secrets/statbank-authenticator
           fi
           
           cd $REPO
@@ -152,8 +156,7 @@ jobs:
 
           TAG=`git describe --tags`
           echo "Found tag $TAG"
-
-          printf "DOCKER_RSTUDIO_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
+          sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
           
           IMAGE=${{ variables.imageNameNexus }}:$TAG
           echo "Pulling $IMAGE"
@@ -192,6 +195,8 @@ jobs:
           then
               echo "repo $REPO does not exist locally, cloning it."
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
+
+              mkdir -p $HOME/secrets/statbank-authenticator
           fi
           
           cd $REPO
@@ -202,8 +207,7 @@ jobs:
 
           TAG=`git describe --tags`
           echo "Found tag $TAG"
-
-          printf "DOCKER_RSTUDIO_IMAGE=nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem:$TAG" > docker/rstudio/.env
+          sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
           
           IMAGE=${{ variables.imageNameNexus }}:$TAG
           echo "Pulling $IMAGE"

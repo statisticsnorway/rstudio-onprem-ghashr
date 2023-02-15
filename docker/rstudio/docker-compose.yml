@@ -12,6 +12,17 @@ services:
 
         # Mounting /var/lib/sss so we can use sssd users from host (REQUIRED FOR PAM AUTHENTICATION)
       - "/var/lib/sss:/var/lib/sss"
-
+    environment:
+      STATBANK_ENCRYPT_URL: http://statbank-authenticator:8080/encrypt
+      STATBANK_BASE_URL: ${STATBANK_BASE_URL}
     ports:
       - "8787:8787"
+
+  statbank-authenticator:
+    image: ${STATBANK_AUTHENTICATOR_IMAGE}
+    container_name: statbank-authenticator
+    restart: always
+    environment:
+      ON_PREM: "True"
+    env_file:
+      - ~/secrets/statbank-authenticator/statbank.env
