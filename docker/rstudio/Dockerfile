@@ -135,10 +135,9 @@ RUN R CMD javareconf -e && \
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
-# Allowing usage of stamme_variabler in the terminal
-# stamme_variabler is also useable in the kernels as
-# the file is sourced before the kernels start
+# Allowing usage of stamme_variabler in the terminal and RStudio
 COPY stamme_variabel /etc/profile.d/stamme_variabel
+RUN . /etc/profile.d/stamme_variabel
 
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
