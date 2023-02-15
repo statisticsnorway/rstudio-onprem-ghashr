@@ -164,8 +164,9 @@ RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 ENV https_proxy=http://proxy.ssb.no:3128
 ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,api.github.com,github.com
 
-COPY start.sh /start.sh
+COPY init /init
+RUN chmod +x /init
 
 EXPOSE 8787
 
-CMD ["/start.sh"]
+CMD ["/init"]
