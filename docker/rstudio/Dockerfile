@@ -21,6 +21,7 @@ RUN apt update && \
     apt-get -y update && \
     apt-get -y upgrade && \
     apt-get -y dist-upgrade && \
+    apt-get -y install openssh-client && \
     apt-get -y install sssd-tools && \
     apt-get -y install wget
 
