@@ -135,9 +135,8 @@ RUN R CMD javareconf -e && \
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
-# Allowing usage of stamme_variabler in the terminal and RStudio
+# adding stamme_variabel to container, and is read by logged in users
 COPY stamme_variabel /etc/profile.d/stamme_variabel
-RUN . /etc/profile.d/stamme_variabel
 
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
@@ -163,9 +162,10 @@ RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 ENV https_proxy=http://proxy.ssb.no:3128
 ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,api.github.com,github.com
 
-COPY init /init
-RUN chmod +x /init
+# Custom startup script which calls the original startup script /init at the end
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 8787
 
-CMD ["/init"]
+CMD ["/start.sh"]
