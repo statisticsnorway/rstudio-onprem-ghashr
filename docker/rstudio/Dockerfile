@@ -159,6 +159,9 @@ RUN chmod +x /usr/local/bin/check-git-config.sh
 RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
 RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
+# Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
+RUN echo -e "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
+
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
 ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com
