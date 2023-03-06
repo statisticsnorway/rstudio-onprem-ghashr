@@ -160,7 +160,9 @@ RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/st
 RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
 # Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
-RUN echo -e "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
+# using printf instead of echo -e because the option -e gets appended to the file,
+# and i could not find a working solution other than printf or copying the file from repo to image
+RUN printf "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
 
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
