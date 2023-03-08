@@ -12,6 +12,9 @@ services:
 
         # Mounting /var/lib/sss so we can use sssd users from host (REQUIRED FOR PAM AUTHENTICATION)
       - "/var/lib/sss:/var/lib/sss"
+      
+      # Mounting /var/spool/cron/crontabs to hosts ~/cron for persistant crontabs
+      - "~/cron:/var/spool/cron/crontabs"
 
       # Mounting CA-certificate for github
       - "~/cert_Decrypt-CA.pem:/usr/local/share/ca-certificates/cert_Decrypt-CA.crt"

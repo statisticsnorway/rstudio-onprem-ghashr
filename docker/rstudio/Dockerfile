@@ -23,7 +23,8 @@ RUN apt update && \
     apt-get -y dist-upgrade && \
     apt-get -y install openssh-client && \
     apt-get -y install sssd-tools && \
-    apt-get -y install wget
+    apt-get -y install wget && \
+    apt-get -y install cron
 
 ENV S6_VERSION=v2.1.0.2
 ENV RSTUDIO_VERSION=2022.07.2+576

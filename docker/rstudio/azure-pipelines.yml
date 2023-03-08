@@ -110,6 +110,7 @@ jobs:
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
 
               mkdir -p $HOME/secrets/statbank-authenticator
+              mkdir -p $HOME/cron
           fi
 
           cd $REPO
@@ -146,6 +147,7 @@ jobs:
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
 
               mkdir -p $HOME/secrets/statbank-authenticator
+              mkdir -p $HOME/cron
           fi
           
           cd $REPO
@@ -197,6 +199,7 @@ jobs:
               git clone https://github.com/statisticsnorway/rstudio-onprem.git $REPO
 
               mkdir -p $HOME/secrets/statbank-authenticator
+              mkdir -p $HOME/cron
           fi
           
           cd $REPO
