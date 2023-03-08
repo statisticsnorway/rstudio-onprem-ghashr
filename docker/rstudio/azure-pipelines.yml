@@ -111,6 +111,7 @@ jobs:
 
               mkdir -p $HOME/secrets/statbank-authenticator
               mkdir -p $HOME/cron
+              chmod 1777 $HOME/cron
           fi
 
           cd $REPO
@@ -148,6 +149,7 @@ jobs:
 
               mkdir -p $HOME/secrets/statbank-authenticator
               mkdir -p $HOME/cron
+              chmod 1777 $HOME/cron
           fi
           
           cd $REPO
@@ -200,6 +202,7 @@ jobs:
 
               mkdir -p $HOME/secrets/statbank-authenticator
               mkdir -p $HOME/cron
+              chmod 1777 $HOME/cron
           fi
           
           cd $REPO
