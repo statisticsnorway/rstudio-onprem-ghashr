@@ -147,6 +147,7 @@ COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 ENV FELLES=/ssb/bruker/felles
 
 # Set localtime to Europe/Oslo
+ENV TZ=Europe/Oslo
 RUN rm -f /etc/localtime && \
     ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 
