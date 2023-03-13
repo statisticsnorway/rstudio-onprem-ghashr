@@ -137,8 +137,8 @@ RUN R CMD javareconf -e && \
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
-# adding stamme_variabel to container, and is read by logged in users
-COPY stamme_variabel /etc/profile.d/stamme_variabel
+# symlink to /ssb/share/etc/stamme_variabel
+RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
 
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
