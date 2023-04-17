@@ -128,6 +128,7 @@ RUN R CMD javareconf -e && \
     R -e "remotes::install_github('statisticsnorway/Kostra')" && \
     R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
     R -e "remotes::install_github('statisticsnorway/struktuR')" && \
+    R -e "remotes::install_github('statisticsnorway/fellesr')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
     # Doesn t work with Java11 - use a custom one
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
