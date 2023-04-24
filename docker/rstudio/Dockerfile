@@ -124,6 +124,7 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('GISSB', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('googleCloudStorageR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('Hmisc', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('statisticsnorway/SSBpris')" && \
     R -e "remotes::install_github('statisticsnorway/Kostra')" && \
     R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
