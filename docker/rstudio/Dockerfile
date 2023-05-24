@@ -162,7 +162,7 @@ COPY check-git-config.bash /usr/local/bin/check-git-config.sh
 RUN chmod +x /usr/local/bin/check-git-config.sh
 
 # Install ssb-gitconfig.py script
-RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
+RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/kvakk_git_tools/ssb_gitconfig.py
 RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
 # Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
