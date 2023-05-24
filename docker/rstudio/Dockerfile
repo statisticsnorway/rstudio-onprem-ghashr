@@ -125,11 +125,13 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('googleCloudStorageR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('Hmisc', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('sdcTable', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('statisticsnorway/SSBpris')" && \
     R -e "remotes::install_github('statisticsnorway/Kostra')" && \
     R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
     R -e "remotes::install_github('statisticsnorway/struktuR')" && \
     R -e "remotes::install_github('statisticsnorway/fellesr')" && \
+    R -e "remotes::install_github('statisticsnorway/easySdcTable')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
     # Doesn t work with Java11 - use a custom one
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
