@@ -9,7 +9,7 @@ RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    software-properties-common dirmngr build-essential curl wget libssl-dev libcurl4-openssl-dev libgdal-dev libre2-dev \
+    software-properties-common dirmngr build-essential curl wget libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev \
     && apt autoremove -y \
     && apt-get -y clean all \
@@ -125,11 +125,13 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('googleCloudStorageR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('Hmisc', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('sdcTable', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('statisticsnorway/SSBpris')" && \
     R -e "remotes::install_github('statisticsnorway/Kostra')" && \
     R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
     R -e "remotes::install_github('statisticsnorway/struktuR')" && \
     R -e "remotes::install_github('statisticsnorway/fellesr')" && \
+    R -e "remotes::install_github('statisticsnorway/easySdcTable')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
     # Doesn t work with Java11 - use a custom one
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
@@ -160,7 +162,7 @@ COPY check-git-config.bash /usr/local/bin/check-git-config.sh
 RUN chmod +x /usr/local/bin/check-git-config.sh
 
 # Install ssb-gitconfig.py script
-RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/ssb-gitconfig/ssb-gitconfig.py
+RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/kvakk_git_tools/ssb_gitconfig.py
 RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 
 # Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
