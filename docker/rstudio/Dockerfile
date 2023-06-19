@@ -10,7 +10,7 @@ RUN apt-get update -y \
     && apt-get -y dist-upgrade \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
     software-properties-common dirmngr build-essential curl wget libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
-    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev \
+    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libv8-dev \
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
