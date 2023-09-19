@@ -26,8 +26,10 @@ RUN apt update && \
     apt-get -y install wget && \
     apt-get -y install cron
 
-ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=2022.07.2+576
+# ENV S6_VERSION=v2.1.0.2
+# ENV RSTUDIO_VERSION=2022.07.2+576
+# These are being set in Rockers image, so don't use these
+# https://github.com/rocker-org/rocker-versioned2/blob/5fa99b369510466ea8a2803d29e3417f5212a0fc/dockerfiles/rstudio_4.3.1.Dockerfile#L9
 ENV DEFAULT_USER=rstudio
 ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
