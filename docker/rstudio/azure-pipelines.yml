@@ -115,6 +115,7 @@ jobs:
           fi
 
           cd $REPO
+          git stash
           git pull
             
           SERVICE_FILE=/etc/systemd/system/rstudio.service
@@ -153,6 +154,7 @@ jobs:
           fi
           
           cd $REPO
+          git stash
           git pull
 
           echo "Getting the latest git tag"
@@ -206,6 +208,7 @@ jobs:
           fi
           
           cd $REPO
+          git stash
           git pull
 
           echo "Getting the latest git tag"
