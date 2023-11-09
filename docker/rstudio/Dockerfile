@@ -177,7 +177,7 @@ RUN printf "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rs
 
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
-ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
 
 # Custom startup script which calls the original startup script /init at the end
 COPY start.sh /start.sh
