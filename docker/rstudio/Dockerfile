@@ -30,7 +30,9 @@ RUN apt update && \
 RUN add-apt-repository -y ppa:cran/poppler && \
     apt-get update -y && \
     apt-get install -y libpoppler-cpp-dev && \
-    apt-get install -y libtesseract-dev
+    apt-get install -y libtesseract-dev && \
+    apt-get install tesseract-ocr-eng && \
+    apt-get install tesseract-ocr-nor
 
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
