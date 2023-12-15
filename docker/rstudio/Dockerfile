@@ -26,10 +26,11 @@ RUN apt update && \
     apt-get -y install wget && \
     apt-get -y install cron
 
-# Added repository for libpoppler-cpp-dev, required by pdftools
+# Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract
 RUN add-apt-repository -y ppa:cran/poppler && \
     apt-get update -y && \
-    apt-get install -y libpoppler-cpp-dev
+    apt-get install -y libpoppler-cpp-dev && \
+    apt-get install -y libtesseract-dev
 
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
