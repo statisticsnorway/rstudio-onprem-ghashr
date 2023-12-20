@@ -29,7 +29,8 @@ RUN apt update && \
 # Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
-    apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor
+    apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
+    apt-get install -y libmagick++-dev
 
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
