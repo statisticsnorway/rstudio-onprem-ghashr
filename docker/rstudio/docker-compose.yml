@@ -22,6 +22,7 @@ services:
     environment:
       STATBANK_ENCRYPT_URL: http://statbank-authenticator:8080/encrypt
       STATBANK_BASE_URL: ${STATBANK_BASE_URL}
+      DAPLA_ENVIRONMENT: ${DAPLA_ENVIRONMENT}
     ports:
       - "8787:8787"
 
