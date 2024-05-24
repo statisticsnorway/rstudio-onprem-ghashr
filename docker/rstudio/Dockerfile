@@ -54,7 +54,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     # installing yad (yet another dialog)
     apt-get -y install yad && \
     apt-get install -y iputils-ping && \
-    apt-get install -y --no-install-recommends libaio1
+    apt-get install -y --no-install-recommends libaio1 libaio-dev
 
 ENV R_HOME /usr/local/lib/R
 ENV R_LIBS_USER /usr/local/lib/R/library
@@ -81,10 +81,15 @@ RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/ora
 # Installing oracle-instantclient components using alien
 RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
+    # Must install sqlplus seperately because of an issue installing using alien
+    cd /tmp && \
+    rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
+    sudo cp -r /tmp/usr/* /usr/ && \
+    rm -rf /tmp/usr && \
+    ldconfig && \
     rm -rf /tmp/oracle-instantclient-*
 
 # https://cran.r-project.org/web/packages/arrow/vignettes/install.html
@@ -102,6 +107,9 @@ RUN apt-get update -y && \
 
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
+# Copy the ROracle installation file into the container
+COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+
 # Setup R java support and install R packages that are not available as Ubuntu packages
 RUN R CMD javareconf -e && \
     R -e "install.packages('openxlsx', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
@@ -116,7 +124,12 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('sfarrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('dbplyr', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('shiny', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
-    R -e "install.packages('ROracle', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    # Remove this way of installing ROracle because ROracle does not have support for 4.4.0 live repo
+    # Therefore we install this seperately
+    #R -e "install.packages('ROracle', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source')" && \
+    # Remove ROracle tar.gz because it is no longer needed
+    rm -f /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz && \
     R -e "install.packages('rstudioapi', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('httr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('readr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
