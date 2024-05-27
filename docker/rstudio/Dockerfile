@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.3.2
+FROM rocker/r-ver:4.4.0
 
 ARG openjdk_version="17"
 USER root
