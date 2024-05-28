@@ -32,6 +32,10 @@ RUN apt-get update -y && \
     apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
     apt-get install -y libmagick++-dev
 
+# Added dependencies for ProtoBuf
+RUN apt-get update -y && \
+    apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
+
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
 # These are being set in Rockers image, so don't use these
@@ -179,6 +183,9 @@ COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
+ENV ARROW_GCS=OFF
+ENV ARROW_S3=OFF
+ENV ARROW_THIRDPARTY_DEPENDENCY_DIR=/ssb/bruker/felles/R_pakker/arrow
 
 # Set localtime to Europe/Oslo
 ENV TZ=Europe/Oslo
