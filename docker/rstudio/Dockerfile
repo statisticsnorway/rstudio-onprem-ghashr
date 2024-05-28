@@ -183,6 +183,9 @@ COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
+ENV ARROW_GCS=OFF
+ENV ARROW_S3=OFF
+ENV ARROW_THIRDPARTY_DEPENDENCY_DIR=/ssb/bruker/felles/R_pakker/arrow
 
 # Set localtime to Europe/Oslo
 ENV TZ=Europe/Oslo
