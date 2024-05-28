@@ -32,6 +32,10 @@ RUN apt-get update -y && \
     apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
     apt-get install -y libmagick++-dev
 
+# Added dependencies for ProtoBuf
+RUN apt-get update -y && \
+    apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
+
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
 # These are being set in Rockers image, so don't use these
