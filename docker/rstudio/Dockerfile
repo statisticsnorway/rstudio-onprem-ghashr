@@ -10,6 +10,7 @@ RUN apt-get update -y \
     && apt-get -y dist-upgrade \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
     software-properties-common dirmngr build-essential curl wget libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
+    liblzma-dev libbz2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libv8-dev \
     && apt autoremove -y \
     && apt-get -y clean all \
@@ -31,6 +32,10 @@ RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
     apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
     apt-get install -y libmagick++-dev
+
+# Added dependencies for ProtoBuf
+RUN apt-get update -y && \
+    apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
 
 # ENV S6_VERSION=v2.1.0.2
 # ENV RSTUDIO_VERSION=2022.07.2+576
@@ -119,6 +124,7 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('leaflet', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('getPass', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('rjwsacruncher', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('sf', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('sfarrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
@@ -155,12 +161,12 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('eurostat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('dggridR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
-    R -e "remotes::install_github('statisticsnorway/SSBpris')" && \
-    R -e "remotes::install_github('statisticsnorway/Kostra')" && \
-    R -e "remotes::install_github('statisticsnorway/SdcForetakPerson')" && \
-    R -e "remotes::install_github('statisticsnorway/struktuR')" && \
-    R -e "remotes::install_github('statisticsnorway/fellesr')" && \
-    R -e "remotes::install_github('statisticsnorway/easySdcTable')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-pris')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-kostra')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-struktur')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-fellesr')" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-easysdctable')" && \
     R -e "remotes::install_github('statisticsnorway/ReGenesees')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
     # Doesn t work with Java11 - use a custom one
@@ -179,6 +185,9 @@ COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
+ENV ARROW_GCS=OFF
+ENV ARROW_S3=OFF
+ENV ARROW_THIRDPARTY_DEPENDENCY_DIR=/ssb/bruker/felles/R_pakker/arrow
 
 # Set localtime to Europe/Oslo
 ENV TZ=Europe/Oslo
