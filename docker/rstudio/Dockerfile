@@ -161,11 +161,14 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('eurostat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('dggridR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('git2r', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('testthat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('usethis', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-pris')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-kostra')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-struktur')" && \
-    R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE)" && \
+    R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)" && \
     R -e "remotes::install_github('statisticsnorway/ssb-easysdctable')" && \
     R -e "remotes::install_github('statisticsnorway/ReGenesees')" && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
