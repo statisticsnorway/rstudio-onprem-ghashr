@@ -164,6 +164,7 @@ RUN R CMD javareconf -e && \
     R -e "install.packages('git2r', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('testthat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "install.packages('usethis', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
+    R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-pris')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-kostra')" && \
     R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" && \
