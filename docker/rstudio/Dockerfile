@@ -68,11 +68,10 @@ ENV R_LIBS_USER /usr/local/lib/R/library
 COPY Rprofile.site /etc/R/Rprofile.site
 COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
-# Setting up environment variables for oracle and R and Java
+# Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
 ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
 ENV ORACLE_HOME=/usr/lib/oracle/21/client64
-ENV JAVA_HOME=/usr/lib/jvm/java-${openjdk_version}-openjdk-amd64
 ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/21/client64/lib
 
