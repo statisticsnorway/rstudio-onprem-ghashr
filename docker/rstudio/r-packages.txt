@@ -1,7 +1,6 @@
 r-cran-sparklyr
 r-cran-ggplot2
 r-cran-tidyverse
-
 r-cran-docopt
 r-cran-smallcountrounding
 r-cran-e1071
@@ -40,12 +39,9 @@ r-cran-countrycode
 r-cran-gargle
 r-cran-lubridate
 r-cran-haven
-
-
 r-cran-openxlsx
 r-cran-survey
 r-cran-renv
-
 r-cran-dbplyr
 r-cran-shiny
 r-cran-rstudioapi
@@ -63,7 +59,6 @@ r-cran-eurostat
 r-cran-git2r
 r-cran-testthat
 r-cran-usethis
-
 r-cran-yaml
 r-cran-rjstat
 r-cran-jsonlite
