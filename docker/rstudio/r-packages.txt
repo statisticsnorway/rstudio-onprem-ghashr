@@ -4,7 +4,6 @@ r-cran-tidyverse
 r-cran-docopt
 r-cran-smallcountrounding
 r-cran-e1071
-r-cran-easysdctable
 r-cran-rglpk
 r-cran-remotes
 r-cran-devtools
@@ -39,8 +38,6 @@ r-cran-countrycode
 r-cran-gargle
 r-cran-lubridate
 r-cran-haven
-r-cran-openxlsx
-r-cran-survey
 r-cran-renv
 r-cran-dbplyr
 r-cran-shiny
@@ -51,12 +48,8 @@ r-cran-sf
 r-cran-knitr
 r-cran-rmarkdown
 r-cran-here
-r-cran-simputation
 r-cran-googlecloudstorager
 r-cran-hmisc
-r-cran-rjdemetra
-r-cran-eurostat
-r-cran-git2r
 r-cran-testthat
 r-cran-usethis
 r-cran-yaml
