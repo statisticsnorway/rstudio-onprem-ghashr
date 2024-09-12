@@ -39,16 +39,18 @@ RUN apt-get update -y \
 # Adding packages 
 COPY r-packages.txt /tmp/r-packages.txt
 
-RUN apt-get update -y && \
+RUN apt-get update -y \
+    && apt-get -y upgrade \
+    && apt-get -y dist-upgrade \
     # vim support
-    apt-get -y install vim && \
+    && apt-get -y install vim \
     # Installing bsdmainutils, helped solve colrm message after every command in the terminal
-    apt-get install -y bsdmainutils && \
+    && apt-get install -y bsdmainutils \
     #Added this to add packages from :
-    xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt && \ 
-    apt autoremove -y && \
-    apt-get -y clean all && \
-    rm -rf /var/lib/apt/lists/*
+    && xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt \ 
+    && apt autoremove -y \
+    && apt-get -y clean all \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # Installing sssd-tools (required for authentication)
