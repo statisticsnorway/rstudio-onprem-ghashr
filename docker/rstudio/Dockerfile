@@ -153,8 +153,8 @@ RUN R CMD javareconf -e \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
     && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
 
-COPY r-packages-git.R /tmp/r-packages-git.R
-RUN Rscript /tmp/r-packages-git.R    
+#COPY r-packages-git.R /tmp/r-packages-git.R
+#RUN Rscript /tmp/r-packages-git.R    
 
 
 # add tnsnames.ora to oracle path

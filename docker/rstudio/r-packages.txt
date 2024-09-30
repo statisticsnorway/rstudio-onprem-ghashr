@@ -38,7 +38,6 @@ r-cran-countrycode
 r-cran-gargle
 r-cran-lubridate
 r-cran-haven
-r-cran-renv
 r-cran-dbplyr
 r-cran-shiny
 r-cran-rstudioapi
@@ -57,3 +56,4 @@ r-cran-rjstat
 r-cran-jsonlite
 r-cran-pxweb
 r-cran-stringr
+
