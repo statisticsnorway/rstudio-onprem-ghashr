@@ -3,6 +3,8 @@ FROM rocker/r-ver:4.4.0
 ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
 
+ENV JAVA_HOME= "/usr/lib/jvm/java-${openjdk_version}-openjdk-amd64"
+
 # We will install R and packages using instructions from https://cloud.r-project.org/
 # Should be installed into /usr/lib/R/site-library
 RUN apt-get update -y \
