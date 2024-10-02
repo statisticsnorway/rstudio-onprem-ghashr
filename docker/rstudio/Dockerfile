@@ -9,7 +9,7 @@ RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libgdal-dev libre2-dev \
+    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
     # add the signing key (by Michael Rutter) for these repos
     # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
@@ -39,7 +39,8 @@ RUN apt-get update -y \
 # Adding packages 
 COPY r-packages.txt /tmp/r-packages.txt
 
-RUN apt-get update -y \
+RUN R CMD javareconf -e \
+    && apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
     # vim support

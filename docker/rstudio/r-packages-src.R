@@ -1,5 +1,5 @@
 pkgs <- c(
-    'DBI','leaflet','getPass','rjwsacruncher','sfarrow','Rcurl', 'esquisse','dcmodify','googleCloudStorageR','tidyfst', 'Hmisc', 'DT', 'configr','dggridR',
+    'DBI','leaflet','getPass', 'rJava','rjwsacruncher','sfarrow','Rcurl', 'esquisse','dcmodify','googleCloudStorageR','tidyfst', 'Hmisc', 'DT', 'configr','dggridR',
     'renv', 'openxlsx', 'survey', 'git2r', 'eurostat', 'simputation','sdcTable','RJDemetra',
     'SmallCountRounding',
     'PxWebApiData',
