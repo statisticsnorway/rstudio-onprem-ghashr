@@ -83,6 +83,7 @@ RUN apt-get update -y && \
 ENV DEFAULT_USER=rstudio
 ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 RUN /rocker_scripts/install_rstudio.sh && \
     /rocker_scripts/install_pandoc.sh && \
