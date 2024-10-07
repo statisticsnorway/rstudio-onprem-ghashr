@@ -47,7 +47,7 @@ RUN R CMD javareconf -e \
     && apt-get -y install vim \
     # Installing bsdmainutils, helped solve colrm message after every command in the terminal
     && apt-get install -y bsdmainutils \
-    && apt-get install -y r-cran-rjava \
+    && apt-get -y install libbz2-dev \
     #Added this to add packages from :
     && xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt \ 
     && apt autoremove -y \
@@ -161,7 +161,7 @@ RUN R CMD javareconf -e \
 
 
 # add tnsnames.ora to oracle path
-#RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
+RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
 # symlink to /ssb/share/etc/stamme_variabel
 RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel

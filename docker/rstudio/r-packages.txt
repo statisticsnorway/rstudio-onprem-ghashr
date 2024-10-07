@@ -1,6 +1,5 @@
 r-cran-sparklyr
 r-cran-ggplot2
-r-cran-tidyverse
 r-cran-docopt
 r-cran-smallcountrounding
 r-cran-e1071
@@ -10,6 +9,7 @@ r-cran-devtools
 r-cran-units
 r-cran-ggraph
 r-cran-tidygraph
+r-cran-rjdemetra
 r-cran-nabor
 r-cran-rcpptoml
 r-cran-classint
