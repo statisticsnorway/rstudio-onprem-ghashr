@@ -108,6 +108,9 @@ ENV R_LIBS_USER /usr/local/lib/R/library
 COPY Rprofile.site /etc/R/Rprofile.site
 COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
+RUN R --no-echo -e "library(tidyverse)"
+RUN R --no-echo -e "library(rJava)"
+
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
 ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
