@@ -1,4 +1,4 @@
-#FROM rocker/r-ver:4.4.0
+FROM rocker/r-ver:4.4.0
 
 ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
@@ -19,7 +19,7 @@ RUN apt-get update -y \
     && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc \
     | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
     # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
-    && add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    #&& add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     # Install arrow libraries, see:  \
     # https://github.com/kou/arrow-site/blob/main/install.md#c-and-glib-c-packages-for-debian-gnulinux-ubuntu-almalinux-centos-and-amazon-linux
     && wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
