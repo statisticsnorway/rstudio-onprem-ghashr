@@ -31,24 +31,15 @@ RUN apt-get update -y \
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
     # Get access to 5000+ CRAN Packages
-    && add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
+    #&& add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
-
 # Adding packages 
-COPY r-packages.txt /tmp/r-packages.txt
-
-ENV R_HOME /usr//lib/R
-ENV R_LIBS_USER /usr//lib/R/library
-
-# Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr//lib/R/etc/Rprofile.site
+#COPY r-packages.txt /tmp/r-packages.txt
 
 RUN R CMD javareconf -e \
     && apt-get update -y \
@@ -60,12 +51,10 @@ RUN R CMD javareconf -e \
     && apt-get install -y bsdmainutils \
     && apt-get -y install libbz2-dev \
     #Added this to add packages from :
-    && xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt \ 
+    #&& xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt \ 
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
-
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -113,8 +102,6 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
-
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
 ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
@@ -152,6 +139,13 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+
+ENV R_HOME /usr/lib/R
+ENV R_LIBS_USER /usr/lib/R/library
+
+# Change default R repo
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr//lib/R/etc/Rprofile.site
 
 # Setup R java support and install R packages that are not available as Ubuntu packages
 COPY r-packages-src.R /tmp/r-packages-src.R
