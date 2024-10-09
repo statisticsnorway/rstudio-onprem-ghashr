@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.4.0
+#FROM rocker/r-ver:4.4.0
 
 ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
@@ -43,12 +43,12 @@ RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.
 # Adding packages 
 COPY r-packages.txt /tmp/r-packages.txt
 
-ENV R_HOME /usr/local/lib/R
-ENV R_LIBS_USER /usr/local/lib/R/library
+ENV R_HOME /usr//lib/R
+ENV R_LIBS_USER /usr//lib/R/library
 
 # Change default R repo
 COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+COPY Rprofile.site /usr//lib/R/etc/Rprofile.site
 
 RUN R CMD javareconf -e \
     && apt-get update -y \
