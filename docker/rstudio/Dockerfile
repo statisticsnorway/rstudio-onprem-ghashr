@@ -4,13 +4,6 @@ ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
-ENV R_HOME /usr/local/lib/R
-ENV R_LIBS_USER /usr/local/lib/R/library
-
-# Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths())"
 
 # We will install R and packages using instructions from https://cloud.r-project.org/
 # Should be installed into /usr/lib/R/site-library
@@ -50,6 +43,13 @@ RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.
 # Adding packages 
 COPY r-packages.txt /tmp/r-packages.txt
 
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
+
+# Change default R repo
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+
 RUN R CMD javareconf -e \
     && apt-get update -y \
     && apt-get -y upgrade \
@@ -66,7 +66,6 @@ RUN R CMD javareconf -e \
     && rm -rf /var/lib/apt/lists/*
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
-
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
