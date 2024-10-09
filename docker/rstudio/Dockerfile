@@ -3,14 +3,14 @@ FROM rocker/r-ver:4.4.0
 ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
 
-RUN R --no-echo -e "print(Sys.getenv('R_HOME'))"
-ENV R_HOME /usr/lib/R
-ENV R_LIBS_USER /usr/lib/R/library
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
 
 # Change default R repo
 COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/lib/R/etc/Rprofile.site
-RUN R --no-echo -e "print(Sys.getenv('R_HOME'))"
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths())"
 
 # We will install R and packages using instructions from https://cloud.r-project.org/
 # Should be installed into /usr/lib/R/site-library
@@ -45,6 +45,8 @@ RUN apt-get update -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
+
 # Adding packages 
 COPY r-packages.txt /tmp/r-packages.txt
 
@@ -62,6 +64,8 @@ RUN R CMD javareconf -e \
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
+
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 
 # Installing sssd-tools (required for authentication)
@@ -110,10 +114,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
 
-
-
-#RUN R --no-echo -e "library(tidyverse)"
-#RUN R --no-echo -e "library(rJava)"
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
@@ -162,6 +163,8 @@ RUN R CMD javareconf -e \
     && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
     && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 #COPY r-packages-git.R /tmp/r-packages-git.R
 #RUN Rscript /tmp/r-packages-git.R    
