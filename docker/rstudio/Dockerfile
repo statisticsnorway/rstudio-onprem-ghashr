@@ -101,12 +101,12 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
 
-ENV R_HOME /usr/local/lib/R
-ENV R_LIBS_USER /usr/local/lib/R/library
+#ENV R_HOME /usr/local/lib/R
+#ENV R_LIBS_USER /usr/local/lib/R/library
 
 # Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+#COPY Rprofile.site /etc/R/Rprofile.site
+#COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 RUN R --no-echo -e "library(tidyverse)"
 RUN R --no-echo -e "library(rJava)"
