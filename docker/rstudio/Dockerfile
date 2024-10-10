@@ -32,13 +32,13 @@ RUN apt-get update -y \
     && gpg-agent --daemon \
     # alien is a helper to install oracle instantclient
     && apt-get install -y --no-install-recommends alien  \
-    apt-get -y update && \
+    && apt-get -y update  \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
     #apt-get -y install texlive-full && \
     # installing yad (yet another dialog)
-    apt-get -y install yad && \
-    apt-get install -y iputils-ping && \
-    apt-get install -y --no-install-recommends libaio1 libaio-dev
+    && apt-get -y install yad  \
+    && apt-get install -y iputils-ping  \
+    && apt-get install -y --no-install-recommends libaio1 libaio-dev \
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt autoremove -y \
