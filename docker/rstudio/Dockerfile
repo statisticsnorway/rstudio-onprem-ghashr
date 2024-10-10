@@ -4,8 +4,8 @@ USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
-RUN /rocker_scripts/install_rstudio.sh
-
+#RUN /rocker_scripts/install_rstudio.sh
+RUN ./scripts/install_rstudio.sh
 
 # Set localtime to Europe/Oslo
 ENV TZ=Europe/Oslo
