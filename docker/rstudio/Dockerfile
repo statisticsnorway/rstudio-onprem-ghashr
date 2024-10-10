@@ -42,8 +42,8 @@ ENV R_HOME /usr/local/lib/R
 ENV R_LIBS_USER /usr/local/lib/R/library
 
 # Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+#COPY Rprofile.site /etc/R/Rprofile.site
+#COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Setup R java support and install R packages that are not available as Ubuntu packages
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
