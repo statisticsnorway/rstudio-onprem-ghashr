@@ -30,6 +30,8 @@ RUN apt-get update -y \
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
+    # alien is a helper to install oracle instantclient
+    && apt-get install -y --no-install-recommends alien  \
     # Get access to 5000+ CRAN Packages
     #&& add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
     && apt-get update -y \
@@ -146,8 +148,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get -y update && \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
     #apt-get -y install texlive-full && \
-    # alien is a helper to install oracle instantclient
-    apt-get install -y --no-install-recommends alien && \
+    
     # installing yad (yet another dialog)
     apt-get -y install yad && \
     apt-get install -y iputils-ping && \
