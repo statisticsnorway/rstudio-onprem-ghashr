@@ -38,8 +38,26 @@ RUN apt-get update -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
-# Adding packages 
-#COPY r-packages.txt /tmp/r-packages.txt
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
+
+# Change default R repo
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+
+# Setup R java support and install R packages that are not available as Ubuntu packages
+COPY r-packages-src.R /tmp/r-packages-src.R
+RUN R CMD javareconf -e \
+    && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& Rscript /tmp/r-packages-src.R \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+    # Doesn t work with Java11 - use a custom one
+    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
+    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
+    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -125,26 +143,7 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
-ENV R_HOME /usr/lib/R
-ENV R_LIBS_USER /usr/lib/R/library
 
-# Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr//lib/R/etc/Rprofile.site
-
-# Setup R java support and install R packages that are not available as Ubuntu packages
-COPY r-packages-src.R /tmp/r-packages-src.R
-RUN R CMD javareconf -e \
-    && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    #&& Rscript /tmp/r-packages-src.R \
-    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-    # Doesn t work with Java11 - use a custom one
-    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
-    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
-    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
-
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 #COPY r-packages-git.R /tmp/r-packages-git.R
 #RUN Rscript /tmp/r-packages-git.R    
