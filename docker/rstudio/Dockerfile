@@ -1,6 +1,6 @@
 FROM rocker/r-ver:4.4.0
 
-ARG openjdk_version="17" ########### Open Java-dev-kit
+ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
@@ -46,8 +46,10 @@ COPY Rprofile.site /etc/R/Rprofile.site
 COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Setup R java support and install R packages that are not available as Ubuntu packages
+COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
+
 COPY r-packages-src.R /tmp/r-packages-src.R
-RUN R CMD javareconf -e \
+RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
     && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     #&& Rscript /tmp/r-packages-src.R \
@@ -138,7 +140,6 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
 ENV NOT_CRAN true
 ENV ARROW_GCS=ON
 
-COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
