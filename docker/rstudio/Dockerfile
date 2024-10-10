@@ -1,7 +1,9 @@
 FROM rocker/r-ver:4.4.0
 
-ARG openjdk_version="17" ########### Open Java-dev-kit
+ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
+
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 # We will install R and packages using instructions from https://cloud.r-project.org/
 # Should be installed into /usr/lib/R/site-library
@@ -17,7 +19,7 @@ RUN apt-get update -y \
     && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc \
     | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
     # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
-    && add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    #&& add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     # Install arrow libraries, see:  \
     # https://github.com/kou/arrow-site/blob/main/install.md#c-and-glib-c-packages-for-debian-gnulinux-ubuntu-almalinux-centos-and-amazon-linux
     && wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
@@ -29,31 +31,35 @@ RUN apt-get update -y \
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
     # Get access to 5000+ CRAN Packages
-    && add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
+    #&& add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
-# Adding packages 
-COPY r-packages.txt /tmp/r-packages.txt
+ENV R_HOME /usr/local/lib/R
+ENV R_LIBS_USER /usr/local/lib/R/library
 
-RUN R CMD javareconf -e \
-    && apt-get update -y \
-    && apt-get -y upgrade \
-    && apt-get -y dist-upgrade \
-    # vim support
-    && apt-get -y install vim \
-    # Installing bsdmainutils, helped solve colrm message after every command in the terminal
-    && apt-get install -y bsdmainutils \
-    && apt-get -y install libbz2-dev \
-    #Added this to add packages from :
-    && xargs apt-get install -y --no-install-recommends < /tmp/r-packages.txt \ 
-    && apt autoremove -y \
-    && apt-get -y clean all \
-    && rm -rf /var/lib/apt/lists/*
+# Change default R repo
+#COPY Rprofile.site /etc/R/Rprofile.site
+#COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
+# Setup R java support and install R packages that are not available as Ubuntu packages
+COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
+
+COPY r-packages-src.R /tmp/r-packages-src.R
+RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
+    && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& Rscript /tmp/r-packages-src.R \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+    # Doesn t work with Java11 - use a custom one
+    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
+    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
+    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -83,30 +89,22 @@ RUN apt-get update -y && \
 ENV DEFAULT_USER=rstudio
 ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 RUN /rocker_scripts/install_rstudio.sh && \
-    /rocker_scripts/install_pandoc.sh && \
-    /rocker_scripts/install_quarto.sh && \
+    #/rocker_scripts/install_pandoc.sh && \
+    #/rocker_scripts/install_quarto.sh && \
     #/rocker_scripts/install_texlive.sh && \
-    /rocker_scripts/install_tensorflow.sh && \
+    #/rocker_scripts/install_tensorflow.sh && \
     /rocker_scripts/install_tidyverse.sh && \
     apt-get -y update && \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    apt-get -y install texlive-full && \
+    #apt-get -y install texlive-full && \
     # alien is a helper to install oracle instantclient
     apt-get install -y --no-install-recommends alien && \
     # installing yad (yet another dialog)
     apt-get -y install yad && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
-
-ENV R_HOME /usr/local/lib/R
-ENV R_LIBS_USER /usr/local/lib/R/library
-
-# Change default R repo
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Setting up environment variables for oracle and R
 ENV OCI_INC=/usr/include/oracle/21/client64
@@ -141,24 +139,14 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
 ENV NOT_CRAN true
 ENV ARROW_GCS=ON
 
-COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
-# Setup R java support and install R packages that are not available as Ubuntu packages
-COPY r-packages-src.R /tmp/r-packages-src.R
-RUN R CMD javareconf -e \
-    && Rscript /tmp/r-packages-src.R \
-    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-    # Doesn t work with Java11 - use a custom one
-    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
-    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
-    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+
 
 #COPY r-packages-git.R /tmp/r-packages-git.R
 #RUN Rscript /tmp/r-packages-git.R    
-
 
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
