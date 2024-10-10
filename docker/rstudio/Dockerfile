@@ -5,7 +5,14 @@ USER root
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
 #RUN /rocker_scripts/install_rstudio.sh
-RUN ./scripts/install_rstudio.sh
+#RUN ./scripts/install_rstudio.sh
+RUN wget --no-verbose https://download2.rstudio.org/server/bionic/amd64/rstudio-server-2023.03.0-386-amd64.deb \
+        && apt-get update \
+        && apt-get install -y --no-install-recommends ./rstudio-server-2023.03.0-386-amd64.deb
+
+# I wasn't sure what the password is, so setting one as we are logging as root by default on this docker
+RUN echo "docker:pass" | chpasswd
+RUN rstudio-server start
 
 # Set localtime to Europe/Oslo
 ENV TZ=Europe/Oslo
