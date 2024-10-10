@@ -75,7 +75,7 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     # Must install sqlplus seperately because of an issue installing using alien
     cd /tmp && \
     rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
-    sudo cp -r /tmp/usr/* /usr/ && \
+    cp -r /tmp/usr/* /usr/ && \
     rm -rf /tmp/usr && \
     ldconfig && \
     rm -rf /tmp/oracle-instantclient-*
@@ -84,11 +84,8 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
 ENV NOT_CRAN true
 ENV ARROW_GCS=ON
 
-
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
-
-
 
 COPY r-packages-src.R /tmp/r-packages-src.R
 RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
@@ -99,8 +96,7 @@ RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
     && R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)"  \
     && R -e "remotes::install_github('statisticsnorway/ReGenesees')"  \
     && R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    
-    #install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source') \
+    && R -e "install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source')" \
     #&& Rscript /tmp/r-packages-src.R \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
     # Doesn t work with Java11 - use a custom one
@@ -148,18 +144,10 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get -y update && \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
     #apt-get -y install texlive-full && \
-    
     # installing yad (yet another dialog)
     apt-get -y install yad && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
-
-
-
-
-
-#COPY r-packages-git.R /tmp/r-packages-git.R
-#RUN Rscript /tmp/r-packages-git.R    
 
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
