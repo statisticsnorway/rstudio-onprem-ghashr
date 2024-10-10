@@ -48,10 +48,57 @@ ENV R_LIBS_USER /usr/local/lib/R/library
 # Setup R java support and install R packages that are not available as Ubuntu packages
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
+
+# Setting up environment variables for oracle and
+ENV OCI_INC=/usr/include/oracle/21/client64
+ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
+ENV ORACLE_HOME=/usr/lib/oracle/21/client64
+ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/21/client64/lib
+
+# Downloading oracle instant-client components and saving to /tmp
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm -P /tmp/
+
+# Installing oracle-instantclient components using alien
+RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
+    # Must install sqlplus seperately because of an issue installing using alien
+    cd /tmp && \
+    rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
+    sudo cp -r /tmp/usr/* /usr/ && \
+    rm -rf /tmp/usr && \
+    ldconfig && \
+    rm -rf /tmp/oracle-instantclient-*
+
+# https://cran.r-project.org/web/packages/arrow/vignettes/install.html
+ENV NOT_CRAN true
+ENV ARROW_GCS=ON
+
+
+# Copy the ROracle installation file into the container
+COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+
+
+
 COPY r-packages-src.R /tmp/r-packages-src.R
 RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
     && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('renv', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)"  \
+    && R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)"  \
+    && R -e "remotes::install_github('statisticsnorway/ReGenesees')"  \
+    && R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    
+    #install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source') \
     #&& Rscript /tmp/r-packages-src.R \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
     # Doesn t work with Java11 - use a custom one
@@ -106,42 +153,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y iputils-ping && \
     apt-get install -y --no-install-recommends libaio1 libaio-dev
 
-# Setting up environment variables for oracle and R
-ENV OCI_INC=/usr/include/oracle/21/client64
-ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
-ENV ORACLE_HOME=/usr/lib/oracle/21/client64
-ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/21/client64/lib
 
-# Downloading oracle instant-client components and saving to /tmp
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm -P /tmp/
-
-# Installing oracle-instantclient components using alien
-RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
-    # Must install sqlplus seperately because of an issue installing using alien
-    cd /tmp && \
-    rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
-    sudo cp -r /tmp/usr/* /usr/ && \
-    rm -rf /tmp/usr && \
-    ldconfig && \
-    rm -rf /tmp/oracle-instantclient-*
-
-# https://cran.r-project.org/web/packages/arrow/vignettes/install.html
-ENV NOT_CRAN true
-ENV ARROW_GCS=ON
-
-
-# Copy the ROracle installation file into the container
-COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
 
 
