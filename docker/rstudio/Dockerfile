@@ -32,8 +32,13 @@ RUN apt-get update -y \
     && gpg-agent --daemon \
     # alien is a helper to install oracle instantclient
     && apt-get install -y --no-install-recommends alien  \
-    # Get access to 5000+ CRAN Packages
-    #&& add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+ \
+    apt-get -y update && \
+    # installing texlive via apt instead, the built in install_texlive doesnt supply everything
+    #apt-get -y install texlive-full && \
+    # installing yad (yet another dialog)
+    apt-get -y install yad && \
+    apt-get install -y iputils-ping && \
+    apt-get install -y --no-install-recommends libaio1 libaio-dev
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt autoremove -y \
@@ -141,13 +146,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     #/rocker_scripts/install_texlive.sh && \
     #/rocker_scripts/install_tensorflow.sh && \
     /rocker_scripts/install_tidyverse.sh && \
-    apt-get -y update && \
-    # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    #apt-get -y install texlive-full && \
-    # installing yad (yet another dialog)
-    apt-get -y install yad && \
-    apt-get install -y iputils-ping && \
-    apt-get install -y --no-install-recommends libaio1 libaio-dev
+    
 
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
