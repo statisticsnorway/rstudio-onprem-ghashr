@@ -1,4 +1,4 @@
-FROM rocker/r-base:4.4.0
+FROM rocker/r-ver:4.4.0
 
 ARG openjdk_version="17" ########### Open Java-dev-kit
 USER root
