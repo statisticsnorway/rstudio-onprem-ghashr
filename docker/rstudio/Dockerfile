@@ -1,25 +1,16 @@
-FROM rocker/r-ver:4.4.0
+FROM rocker/rstudio:4.4.0
 
 ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
 
-# We will install R and packages using instructions from https://cloud.r-project.org/
-# Should be installed into /usr/lib/R/site-library
 RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
     && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
     software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
-    # add the signing key (by Michael Rutter) for these repos
-    # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-    # Fingerprint: 298A3A825C0D65DFD57CBB651716619E084DAB9
-    && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc \
-    | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
-    # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
-    #&& add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     # Install arrow libraries, see:  \
     # https://github.com/kou/arrow-site/blob/main/install.md#c-and-glib-c-packages-for-debian-gnulinux-ubuntu-almalinux-centos-and-amazon-linux
     && wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
@@ -47,13 +38,6 @@ RUN apt-get update -y \
 
 ENV R_HOME /usr/local/lib/R
 ENV R_LIBS_USER /usr/local/lib/R/library
-
-# Change default R repo
-#COPY Rprofile.site /etc/R/Rprofile.site
-#COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
-
-# Setup R java support and install R packages that are not available as Ubuntu packages
-COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Setting up environment variables for oracle and
 ENV OCI_INC=/usr/include/oracle/21/client64
@@ -90,6 +74,9 @@ ENV ARROW_GCS=ON
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+
+# Copy Jwsacruncher
+COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 COPY r-packages-src.R /tmp/r-packages-src.R
 RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
@@ -131,22 +118,18 @@ RUN apt-get update -y && \
 RUN apt-get update -y && \
     apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
 
-# ENV S6_VERSION=v2.1.0.2
-# ENV RSTUDIO_VERSION=2022.07.2+576
-# These are being set in Rockers image, so don't use these
 # https://github.com/rocker-org/rocker-versioned2/blob/5fa99b369510466ea8a2803d29e3417f5212a0fc/dockerfiles/rstudio_4.3.1.Dockerfile#L9
 ENV DEFAULT_USER=rstudio
 ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
 
-RUN /rocker_scripts/install_rstudio.sh && \
+#RUN /rocker_scripts/install_rstudio.sh && \
     #/rocker_scripts/install_pandoc.sh && \
     #/rocker_scripts/install_quarto.sh && \
     #/rocker_scripts/install_texlive.sh && \
     #/rocker_scripts/install_tensorflow.sh && \
-    /rocker_scripts/install_tidyverse.sh
+RUN /rocker_scripts/install_tidyverse.sh
     
-
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
