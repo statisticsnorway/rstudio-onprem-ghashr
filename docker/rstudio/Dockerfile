@@ -55,7 +55,6 @@ ENV R_LIBS_USER /usr/local/lib/R/library
 # Setup R java support and install R packages that are not available as Ubuntu packages
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
-
 # Setting up environment variables for oracle and
 ENV OCI_INC=/usr/include/oracle/21/client64
 ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
@@ -145,7 +144,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
     #/rocker_scripts/install_quarto.sh && \
     #/rocker_scripts/install_texlive.sh && \
     #/rocker_scripts/install_tensorflow.sh && \
-    /rocker_scripts/install_tidyverse.sh && \
+    /rocker_scripts/install_tidyverse.sh
     
 
 # add tnsnames.ora to oracle path
