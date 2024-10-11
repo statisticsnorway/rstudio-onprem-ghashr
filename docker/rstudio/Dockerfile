@@ -78,29 +78,29 @@ COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64
 # Copy Jwsacruncher
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
-COPY r-packages-src.R /tmp/r-packages-src.R
-RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
-    && R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+#COPY r-packages-src.R /tmp/r-packages-src.R
+#RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
+    #&& R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+RUN R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     #&& R -e "install.packages('renv', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('SmallCountRounding',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('PxWebApiData',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('SSBtools',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "install.packages('SmallCountRounding',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "install.packages('PxWebApiData',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "install.packages('SSBtools',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     #&& R -e "install.packages('klassR',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('GISSB',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('GaussSuppression'dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "install.packages('GISSB',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     && R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)"  \
-    && R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)"  \
-    && R -e "remotes::install_github('statisticsnorway/ReGenesees')"  \
-    && R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)"  \
+    #&& R -e "remotes::install_github('statisticsnorway/ReGenesees')"  \
+    #&& R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     && R -e "install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-pris')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-kostra')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-struktur')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)" \
-    && R -e "remotes::install_github('statisticsnorway/ReGenesees')" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-pris')" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-kostra')" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-struktur')" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)" \
+    #&& R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)" \
+    #&& R -e "remotes::install_github('statisticsnorway/ReGenesees')" \
     #&& Rscript /tmp/r-packages-src.R \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
     # Doesn t work with Java11 - use a custom one
