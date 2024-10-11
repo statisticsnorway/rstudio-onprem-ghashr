@@ -91,6 +91,17 @@ RUN R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packag
     && R -e "install.packages('GISSB',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     && R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     #&& R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+   
+    && R -e "install.packages('tinytest', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('configr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('DT', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('dcmodify', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('simputation', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('survey', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('srvyr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('eurostat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('dggridR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+    && R -e "install.packages('tidyfst', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
     
     && R -e "install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source')" \
     
