@@ -3,7 +3,7 @@ FROM rocker/geospatial:4.4.0
 ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
 RUN apt-get update -y \
     && apt-get -y upgrade \
@@ -36,10 +36,11 @@ RUN apt-get update -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
+#Set R env variables
 ENV R_HOME /usr/local/lib/R
 ENV R_LIBS_USER /usr/local/lib/R/library
 
-# Setting up environment variables for oracle and
+# Setting up environment variables for oracle
 ENV OCI_INC=/usr/include/oracle/21/client64
 ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
 ENV ORACLE_HOME=/usr/lib/oracle/21/client64
@@ -69,8 +70,8 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     rm -rf /tmp/oracle-instantclient-*
 
 # https://cran.r-project.org/web/packages/arrow/vignettes/install.html
-ENV NOT_CRAN true
-ENV ARROW_GCS=ON
+#ENV NOT_CRAN true
+#ENV ARROW_GCS=ON
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
@@ -78,50 +79,23 @@ COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64
 # Copy Jwsacruncher
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
-#COPY r-packages-src.R /tmp/r-packages-src.R
+# Copy R-script that installs packages from source
+COPY r-packages-src.R /tmp/r-packages-src.R
+
 #RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
     #&& R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-RUN R -e "install.packages('RJDemetra', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    #&& R -e "install.packages('renv', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('SmallCountRounding',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('PxWebApiData',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('openxlsx',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('SSBtools',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    #&& R -e "install.packages('klassR',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('GISSB',dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('GaussSuppression', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    #&& R -e "install.packages('arrow', dependencies=FALSE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-   
-    && R -e "install.packages('tinytest', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('configr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('DT', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('dcmodify', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('simputation', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('survey', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('srvyr', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('eurostat', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('dggridR', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    && R -e "install.packages('tidyfst', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
-    
-    && R -e "install.packages('/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz', repos = NULL, type='source')" \
-    
-    && R -e "remotes::install_github('statisticsnorway/ssb-pris')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-kostra')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-sdcforetakperson')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-struktur')" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-fellesr', dependencies=TRUE, verbose=TRUE)" \
-    && R -e "remotes::install_github('statisticsnorway/ssb-easysdctable', dependencies=TRUE, verbose=TRUE)" \
-    && R -e "remotes::install_github('statisticsnorway/ReGenesees')" \
-    #&& Rscript /tmp/r-packages-src.R \
+
+# Install additional packages from source
+RUN Rscript /tmp/r-packages-src.R \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
     # Doesn t work with Java11 - use a custom one
     && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
     && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'));print(.libPaths()); print(installed.packages())"
+RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
-# Change default R repo
+# Change default R repo (used by renv)
 COPY Rprofile.site /etc/R/Rprofile.site
 COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
@@ -146,18 +120,6 @@ RUN apt-get update -y && \
 RUN apt-get update -y && \
     apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
 
-# https://github.com/rocker-org/rocker-versioned2/blob/5fa99b369510466ea8a2803d29e3417f5212a0fc/dockerfiles/rstudio_4.3.1.Dockerfile#L9
-ENV DEFAULT_USER=rstudio
-ENV PANDOC_VERSION=default
-ENV QUARTO_VERSION=default
-
-#RUN /rocker_scripts/install_rstudio.sh && \
-    #/rocker_scripts/install_pandoc.sh && \
-    #/rocker_scripts/install_quarto.sh && \
-    #/rocker_scripts/install_texlive.sh && \
-    #/rocker_scripts/install_tensorflow.sh && \
-#RUN /rocker_scripts/install_tidyverse.sh
-    
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
