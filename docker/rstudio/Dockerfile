@@ -25,7 +25,7 @@ RUN apt-get update -y \
     && apt-get install -y --no-install-recommends alien  \
     && apt-get -y update  \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    #apt-get -y install texlive-full && \
+    && apt-get -y install texlive-full \
     # installing yad (yet another dialog)
     && apt-get -y install yad  \
     && apt-get install -y iputils-ping  \
@@ -68,10 +68,6 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     rm -rf /tmp/usr && \
     ldconfig && \
     rm -rf /tmp/oracle-instantclient-*
-
-# https://cran.r-project.org/web/packages/arrow/vignettes/install.html
-#ENV NOT_CRAN true
-#ENV ARROW_GCS=ON
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
@@ -131,7 +127,6 @@ COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 
 # Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
-ENV ARROW_GCS=OFF
 ENV ARROW_S3=OFF
 ENV ARROW_THIRDPARTY_DEPENDENCY_DIR=/ssb/bruker/felles/R_pakker/arrow
 
