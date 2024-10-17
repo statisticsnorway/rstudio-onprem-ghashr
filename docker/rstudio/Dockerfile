@@ -1,4 +1,4 @@
-FROM rocker/tidyverse:4.4.0
+FROM rocker/geospatial:4.4.0
 
 ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
@@ -25,7 +25,10 @@ RUN apt-get update -y \
     && apt-get install -y --no-install-recommends alien  \
     && apt-get -y update  \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    && apt-get -y install texlive-full \
+    #&& apt-get -y install texlive-full \
+    && apt-get install `apt-get --assume-no install texlive-full | \
+		awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
+		tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '`
     # installing yad (yet another dialog)
     && apt-get -y install yad  \
     && apt-get install -y iputils-ping  \
