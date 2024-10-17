@@ -26,7 +26,7 @@ RUN apt-get update -y \
     && apt-get -y update  \
     # installing texlive via apt instead, the built in install_texlive doesnt supply everything
     #&& apt-get -y install texlive-full \
-    && apt-get install `apt-get --assume-no install texlive-full | \
+    && apt-get install -y `apt-get --assume-no install texlive-full | \
 		awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
 		tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
     # installing yad (yet another dialog)
