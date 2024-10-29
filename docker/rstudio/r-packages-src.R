@@ -15,7 +15,8 @@ pkgs <- c(
     'srvyr', 
     'eurostat', 
     'dggridR', 
-    'tidyfst')
+    'tidyfst',
+    'plotly')
 
 install.packages(pkgs, dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')
 
