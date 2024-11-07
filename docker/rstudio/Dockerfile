@@ -17,25 +17,25 @@ RUN apt-get update -y \
     && apt install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     && apt update \
     && apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev \
-    libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev \
+    libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev xtensor-dev \
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
     # alien is a helper to install oracle instantclient
-    && apt-get install -y --no-install-recommends alien  \
-    && apt-get -y update  \
-    # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    #&& apt-get -y install texlive-full \
-    && apt-get install -y `apt-get --assume-no install texlive-full | \
-		awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
-		tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
-    # installing yad (yet another dialog)
-    && apt-get -y install yad  \
-    && apt-get install -y iputils-ping  \
-    && apt-get install -y --no-install-recommends libaio1 libaio-dev \
-    && apt-get update -y \
-    && apt-get upgrade -y \
-    && apt autoremove -y \
+    # && apt-get install -y --no-install-recommends alien  \
+    # && apt-get -y update  \
+    # # installing texlive via apt instead, the built in install_texlive doesnt supply everything
+    # #&& apt-get -y install texlive-full \
+  #   && apt-get install -y `apt-get --assume-no install texlive-full | \
+		# awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
+		# tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
+  #   # installing yad (yet another dialog)
+  #   && apt-get -y install yad  \
+  #   && apt-get install -y iputils-ping  \
+  #   && apt-get install -y --no-install-recommends libaio1 libaio-dev \
+  #   && apt-get update -y \
+  #   && apt-get upgrade -y \
+  #   && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
@@ -50,49 +50,49 @@ ENV ORACLE_HOME=/usr/lib/oracle/21/client64
 ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/oracle/21/client64/lib
 
-# Downloading oracle instant-client components and saving to /tmp
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm -P /tmp/
+# # Downloading oracle instant-client components and saving to /tmp
+# RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+#     wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+#     wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+#     wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+#     wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+#     wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm -P /tmp/
 
-# Installing oracle-instantclient components using alien
-RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
-    alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
-    # Must install sqlplus seperately because of an issue installing using alien
-    cd /tmp && \
-    rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
-    cp -r /tmp/usr/* /usr/ && \
-    rm -rf /tmp/usr && \
-    ldconfig && \
-    rm -rf /tmp/oracle-instantclient-*
+# # Installing oracle-instantclient components using alien
+# RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
+#     alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
+#     alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
+#     alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
+#     alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
+#     # Must install sqlplus seperately because of an issue installing using alien
+#     cd /tmp && \
+#     rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
+#     cp -r /tmp/usr/* /usr/ && \
+#     rm -rf /tmp/usr && \
+#     ldconfig && \
+#     rm -rf /tmp/oracle-instantclient-*
 
-# Copy the ROracle installation file into the container
-COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+# # Copy the ROracle installation file into the container
+# COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
-# Copy Jwsacruncher
-COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
+# # Copy Jwsacruncher
+# COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
-# Copy R-script that installs packages from source
-COPY r-packages-src.R /tmp/r-packages-src.R
+# # Copy R-script that installs packages from source
+# COPY r-packages-src.R /tmp/r-packages-src.R
 
-#RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
-    #&& R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
+# #RUN R CMD javareconf JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64/  \
+#     #&& R -e "install.packages('rJava', dependencies=TRUE, repos='https://packagemanager.rstudio.com/cran/latest')"  \
 
-# Install additional packages from source
-RUN Rscript /tmp/r-packages-src.R \
-    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-    # Doesn t work with Java11 - use a custom one
-    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
-    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
-    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+# # Install additional packages from source
+# RUN Rscript /tmp/r-packages-src.R \
+#     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+#     # Doesn t work with Java11 - use a custom one
+#     && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
+#     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
+#     && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
+# RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
 # Change default R repo (used by renv)
 COPY Rprofile.site /etc/R/Rprofile.site
@@ -109,15 +109,15 @@ RUN apt update && \
     apt-get -y install wget && \
     apt-get -y install cron
 
-# Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract ################# This is for displaying pdfs (libpoppler) and text-reading (tessaract)
-RUN apt-get update -y && \
-    apt-get install -y software-properties-common && \
-    apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
-    apt-get install -y libmagick++-dev
+# # Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract ################# This is for displaying pdfs (libpoppler) and text-reading (tessaract)
+# RUN apt-get update -y && \
+#     apt-get install -y software-properties-common && \
+#     apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
+#     apt-get install -y libmagick++-dev
 
-# Added dependencies for ProtoBuf  #################### Serializing structured data
-RUN apt-get update -y && \
-    apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
+# # Added dependencies for ProtoBuf  #################### Serializing structured data
+# RUN apt-get update -y && \
+#     apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
 
 # add tnsnames.ora to oracle path
 RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
