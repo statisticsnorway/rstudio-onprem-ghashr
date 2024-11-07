@@ -120,7 +120,7 @@ RUN apt update && \
 #     apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
 
 # add tnsnames.ora to oracle path
-RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
+# RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
 
 # symlink to /ssb/share/etc/stamme_variabel
 RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
