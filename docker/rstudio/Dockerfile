@@ -18,6 +18,7 @@ RUN apt-get update -y \
     && apt update \
     && apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev \
     libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev xtensor-dev \
+    
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
