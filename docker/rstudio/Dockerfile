@@ -1,4 +1,4 @@
-FROM rocker/geospatial:4.4.0
+FROM rocker/geospatial:4.4.2
 
 ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
