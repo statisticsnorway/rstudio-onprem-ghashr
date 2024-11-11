@@ -1,6 +1,5 @@
 FROM rocker/geospatial:4.4.2
 
-ARG openjdk_version="19" ########### Open Java-dev-kit
 USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
@@ -8,35 +7,7 @@ RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');ca
 RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
-    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
-    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
-    # Install arrow libraries, see:  \
-    # https://github.com/kou/arrow-site/blob/main/install.md#c-and-glib-c-packages-for-debian-gnulinux-ubuntu-almalinux-centos-and-amazon-linux
-    && wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
-    && apt install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
-    && apt update \
-    && apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev \
-    libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev xtensor-dev \
-    
-    # add git repo
-    && add-apt-repository -y ppa:git-core/ppa \
-    && gpg-agent --daemon \
-    # alien is a helper to install oracle instantclient
-    # && apt-get install -y --no-install-recommends alien  \
-    # && apt-get -y update  \
-    # # installing texlive via apt instead, the built in install_texlive doesnt supply everything
-    # #&& apt-get -y install texlive-full \
-  #   && apt-get install -y `apt-get --assume-no install texlive-full | \
-		# awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
-		# tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
-  #   # installing yad (yet another dialog)
-  #   && apt-get -y install yad  \
-  #   && apt-get install -y iputils-ping  \
-  #   && apt-get install -y --no-install-recommends libaio1 libaio-dev \
-  #   && apt-get update -y \
-  #   && apt-get upgrade -y \
-  #   && apt autoremove -y \
+
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
