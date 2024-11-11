@@ -8,10 +8,6 @@ RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
 
-    # add git repo
-    && add-apt-repository -y ppa:git-core/ppa \
-    && gpg-agent --daemon \
-
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
 
