@@ -28,7 +28,7 @@ RUN apt-get update -y \
     && apt-get install -y libpng-dev \
     && apt-get install -y libtiff5-dev \
     && apt-get install -y libjpeg-dev \
-    && apt-get install -y unixodbc-dev \
+    && apt-get install -y unixodbc-dev 
     
 
     
