@@ -11,13 +11,14 @@ RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');ca
 RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
-    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
-    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
+    # && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
+    # software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
+    # apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
+    
     # Add the Apache Arrow repository
-    && wget https://apache.jfrog.io/artifactory/arrow/ubuntu/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
-    && apt install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
-    && apt update \
+    # && wget https://apache.jfrog.io/artifactory/arrow/ubuntu/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+    # && apt install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+    # && apt update \
     # Set package pinning for Apache Arrow and dependencies to version 17.0.0
     && echo "Package: libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev gir1.2-arrow-1.0 gir1.2-arrow-dataset-1.0 gir1.2-arrow-flight-1.0 gir1.2-arrow-flight-sql-1.0 gir1.2-gandiva-1.0 gir1.2-parquet-1.0\nPin: version 17.0.0-1\nPin-Priority: 1001" > /etc/apt/preferences.d/arrow-pinning \
     # Install Arrow and Parquet dependencies for version 17.0.0
