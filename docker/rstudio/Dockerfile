@@ -2,7 +2,7 @@ FROM rocker/geospatial:4.4.2
 
 USER root
 
-ARG libarrow_version = "17.0.0-1"
+ARG libarrow_version="17.0.0-1"
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
