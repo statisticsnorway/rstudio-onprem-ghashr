@@ -4,12 +4,12 @@ USER root
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
-RUN apt-get update -y \
-    && apt-get -y upgrade \
-    && apt-get -y dist-upgrade \
+# RUN apt-get update -y \
+#     && apt-get -y upgrade \
+#     && apt-get -y dist-upgrade \
 
-    && apt-get -y clean all \
-    && rm -rf /var/lib/apt/lists/*
+#     && apt-get -y clean all \
+#     && rm -rf /var/lib/apt/lists/*
 
 #Set R env variables
 ENV R_HOME /usr/local/lib/R
