@@ -2,14 +2,47 @@ FROM rocker/geospatial:4.4.2
 
 USER root
 
+ARG libarrow_version = "17.0.0-1"
+
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
-# RUN apt-get update -y \
-#     && apt-get -y upgrade \
-#     && apt-get -y dist-upgrade \
+RUN apt-get update -y \
+    && apt-get -y upgrade \
+    && apt-get -y dist-upgrade \
+    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
+    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
+    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
+    # Install arrow libraries, see:  \
+    # https://github.com/kou/arrow-site/blob/main/install.md#c-and-glib-c-packages-for-debian-gnulinux-ubuntu-almalinux-centos-and-amazon-linux
+    
+    # && wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+    # && apt install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+    # && apt update \
 
-#     && apt-get -y clean all \
-#     && rm -rf /var/lib/apt/lists/*
+    # libarrow =17.0.0 / 17.0.0-1
+    && apt-get install -y "libarrow-dev=${libarrow_version}" libarrow-glib-dev=17.0.0-1 libarrow-dataset-dev=17.0.0-1 libarrow-dataset-glib-dev=17.0.0-1 libarrow-acero-dev=17.0.0-1 libarrow-flight-dev=17.0.0-1 libarrow-flight-glib-dev=17.0.0 \
+    libarrow-flight-sql-dev=17.0.0-1 libarrow-flight-sql-glib-dev=17.0.0-1 libgandiva-dev=17.0.0-1 libgandiva-glib-dev=17.0.0-1 libparquet-dev=17.0.0-1 libparquet-glib-dev=17.0.0-1 \
+    
+    # add git repo
+    && add-apt-repository -y ppa:git-core/ppa \
+    && gpg-agent --daemon \
+    # alien is a helper to install oracle instantclient
+    && apt-get install -y --no-install-recommends alien  \
+    && apt-get -y update  \
+    # installing texlive via apt instead, the built in install_texlive doesnt supply everything
+    #&& apt-get -y install texlive-full \
+    && apt-get install -y `apt-get --assume-no install texlive-full | \
+		awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
+		tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
+    # installing yad (yet another dialog)
+    && apt-get -y install yad  \
+    && apt-get install -y iputils-ping  \
+    && apt-get install -y --no-install-recommends libaio1 libaio-dev \
+    && apt-get update -y \
+    && apt-get upgrade -y \
+    && apt autoremove -y \
+    && apt-get -y clean all \
+    && rm -rf /var/lib/apt/lists/*
 
 #Set R env variables
 ENV R_HOME /usr/local/lib/R
