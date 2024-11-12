@@ -1,15 +1,39 @@
-FROM rocker/geospatial:4.4.2
+FROM rocker/geospatial:4.4.1
 
 USER root
 
+ARG openjdk_version="19" ########### Open Java-dev-kit
+ARG libarrow_version="17.0.0-1"
+
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
-# RUN apt-get update -y \
-#     && apt-get -y upgrade \
-#     && apt-get -y dist-upgrade \
+RUN apt-get update -y \
+    && apt-get -y upgrade \
+    && apt-get -y dist-upgrade \
 
-#     && apt-get -y clean all \
-#     && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y libxml2-dev \
+
+    && apt-get install -y libcairo2-dev \
+    && apt-get install -y default-libmysqlclient-dev \
+    && apt-get install -y libpq-dev \
+    && apt-get install -y libsasl2-dev \
+    && apt-get install -y libsqlite3-dev \
+    && apt-get install -y libssh2-1-dev \
+    && apt-get install -y libssh2-1-dev \
+    && apt-get install -y libxtst6 \
+    && apt-get install -y libcurl4-openssl-dev \
+    && apt-get install -y libharfbuzz-dev \
+    && apt-get install -y libfribidi-dev \
+    && apt-get install -y libfreetype6-dev \
+    && apt-get install -y libpng-dev \
+    && apt-get install -y libtiff5-dev \
+    && apt-get install -y libjpeg-dev \
+    && apt-get install -y unixodbc-dev 
+    
+
+    
+    
+ 
 
 #Set R env variables
 ENV R_HOME /usr/local/lib/R
