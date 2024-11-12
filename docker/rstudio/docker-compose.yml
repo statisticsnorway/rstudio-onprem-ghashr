@@ -17,7 +17,7 @@ services:
       - "~/cron:/var/spool/cron/crontabs"
 
       # Mounting CA-certificate for github
-      - "~/cert_Decrypt-CA.pem:/usr/local/share/ca-certificates/cert_Decrypt-CA.crt"
+      - "/etc/pki/ca-trust/source/anchors/cert_Decrypt-CA.crt:/usr/local/share/ca-certificates/cert_Decrypt-CA.crt"
 
     environment:
       STATBANK_ENCRYPT_URL: http://statbank-authenticator:8080/encrypt
