@@ -2,6 +2,7 @@ FROM rocker/geospatial:4.4.2
 
 USER root
 
+ARG openjdk_version="19" ########### Open Java-dev-kit
 ARG libarrow_version="17.0.0-1"
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
@@ -20,7 +21,7 @@ RUN apt-get update -y \
     # && apt update \
 
     # libarrow =17.0.0 / 17.0.0-1
-    && apt-get install -y "libarrow-dev=${libarrow_version}" libarrow-glib-dev=17.0.0-1 libarrow-dataset-dev=17.0.0-1 libarrow-dataset-glib-dev=17.0.0-1 libarrow-acero-dev=17.0.0-1 libarrow-flight-dev=17.0.0-1 libarrow-flight-glib-dev=17.0.0 \
+    && apt-get install -y libarrow-dev=17.0.0-1 libarrow-glib-dev=17.0.0-1 libarrow-dataset-dev=17.0.0-1 libarrow-dataset-glib-dev=17.0.0-1 libarrow-acero-dev=17.0.0-1 libarrow-flight-dev=17.0.0-1 libarrow-flight-glib-dev=17.0.0 \
     libarrow-flight-sql-dev=17.0.0-1 libarrow-flight-sql-glib-dev=17.0.0-1 libgandiva-dev=17.0.0-1 libgandiva-glib-dev=17.0.0-1 libparquet-dev=17.0.0-1 libparquet-glib-dev=17.0.0-1 \
     
     # add git repo
