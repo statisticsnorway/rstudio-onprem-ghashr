@@ -37,7 +37,7 @@ RUN apt-get update -y \
     # installing yad (yet another dialog)
     && apt-get -y install yad  \
     && apt-get install -y iputils-ping  \
-    && apt-get install -y --no-install-recommends libaio1 libaio-dev \
+    # && apt-get install -y --no-install-recommends libaio1 libaio-dev \
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt autoremove -y \
