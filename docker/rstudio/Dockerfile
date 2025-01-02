@@ -1,9 +1,9 @@
-FROM rocker/geospatial:4.4.1
+FROM rocker/geospatial:4.4.2
 
 USER root
 
 ARG openjdk_version="19"
-ARG libarrow_version="18.0.0"
+ARG libarrow_version="18.1.0"
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
 
