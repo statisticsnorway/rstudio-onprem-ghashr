@@ -1,4 +1,4 @@
-FROM rocker/geospatial:4.4.1
+FROM rocker/geospatial:4.4.2
 
 USER root
 
