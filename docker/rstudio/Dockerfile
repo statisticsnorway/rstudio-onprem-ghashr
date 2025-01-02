@@ -2,7 +2,7 @@ FROM rocker/geospatial:4.4.2
 
 USER root
 
-ARG openjdk_version="23"
+ARG openjdk_version="17"
 ARG libarrow_version="18.1.0"
 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
@@ -11,7 +11,8 @@ RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');ca
 RUN apt-get update -y \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
-    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
+    # && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
+    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk" ca-certificates-java \
     software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
     apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev \
     # Add the Apache Arrow repository
