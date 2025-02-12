@@ -22,7 +22,13 @@ RUN apt-get update -y \
     # Set package pinning for Apache Arrow and dependencies to version as specified in libarrow_version
     && echo "Package: libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev gir1.2-arrow-1.0 gir1.2-arrow-dataset-1.0 gir1.2-arrow-flight-1.0 gir1.2-arrow-flight-sql-1.0 gir1.2-gandiva-1.0 gir1.2-parquet-1.0\nPin: version ${libarrow_version}\nPin-Priority: 1001" > /etc/apt/preferences.d/arrow-pinning \
     # Install Arrow and Parquet dependencies for version as specified in libarrow_version
-    && apt-get install -y libarrow-dev=${libarrow_version}-1 libarrow-glib-dev=${libarrow_version}-1 libarrow-dataset-dev=${libarrow_version}-1 libarrow-dataset-glib-dev=${libarrow_version}-1 libarrow-acero-dev=${libarrow_version}-1 libarrow-flight-dev=${libarrow_version}-1 libarrow-flight-glib-dev=${libarrow_version}-1 libarrow-flight-sql-dev=${libarrow_version}-1 libarrow-flight-sql-glib-dev=${libarrow_version}-1 libgandiva-dev=${libarrow_version}-1 libgandiva-glib-dev=${libarrow_version}-1 libparquet-dev=${libarrow_version}-1 libparquet-glib-dev=${libarrow_version}-1 \
+    # && apt-get install -y libarrow-dev=${libarrow_version}-1 libarrow-glib-dev=${libarrow_version}-1 libarrow-dataset-dev=${libarrow_version}-1 libarrow-dataset-glib-dev=${libarrow_version}-1 libarrow-acero-dev=${libarrow_version}-1 libarrow-flight-dev=${libarrow_version}-1 libarrow-flight-glib-dev=${libarrow_version}-1 libarrow-flight-sql-dev=${libarrow_version}-1 libarrow-flight-sql-glib-dev=${libarrow_version}-1 libgandiva-dev=${libarrow_version}-1 libgandiva-glib-dev=${libarrow_version}-1 libparquet-dev=${libarrow_version}-1 libparquet-glib-dev=${libarrow_version}-1 \
+    && apt-get install -y libarrow-dev=${libarrow_version}-1 libarrow-glib-dev=${libarrow_version}-1 libarrow-dataset-dev=${libarrow_version}-1 \ 
+    libarrow-dataset-glib-dev=${libarrow_version}-1 libarrow-acero-dev=${libarrow_version}-1 libarrow-flight-dev=${libarrow_version}-1 \ 
+    libarrow-flight-glib-dev=${libarrow_version}-1 libarrow-flight-sql-dev=${libarrow_version}-1 libarrow-flight-sql-glib-dev=${libarrow_version}-1 \ 
+    gir1.2-arrow-dataset-1.0=${libarrow_version}-1 gir1.2-arrow-flight-1.0=${libarrow_version}-1 gir1.2-arrow-flight-sql-1.0=${libarrow_version}-1 \ 
+    gir1.2-arrow-1.0=${libarrow_version}-1 gir1.2-gandiva-1.0=${libarrow_version}-1 gir1.2-parquet-1.0=${libarrow_version}-1   \ 
+    libgandiva-dev=${libarrow_version}-1 libgandiva-glib-dev=${libarrow_version}-1 libparquet-dev=${libarrow_version}-1 libparquet-glib-dev=${libarrow_version}-1 \
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
