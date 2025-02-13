@@ -8,8 +8,8 @@ Type=oneshot
 RemainAfterExit=true
 User=rstudio
 WorkingDirectory=/home/rstudio/rstudio-onprem/docker/rstudio
-ExecStart=/usr/local/bin/docker-compose -f docker-compose.yml up -d
-ExecStop=/usr/local/bin/docker-compose -f docker-compose.yml stop
+ExecStart=/bin/docker compose -f docker-compose.yml up -d
+ExecStop=/bin/docker compose -f docker-compose.yml stop
 
 [Install]
 WantedBy=multi-user.target
