@@ -4,7 +4,7 @@ USER root
 
 ARG openjdk_version="17"
 ARG libarrow_version="18.1.0"
-
+ 
 RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
  
 # Add Arrow repository and set up package pinning
