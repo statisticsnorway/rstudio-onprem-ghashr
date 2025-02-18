@@ -66,8 +66,8 @@ RUN apt-get install -y \
     && apt-get -y install yad  \
     && apt-get install -y iputils-ping  \
     && apt-get install -y --no-install-recommends libaio1 libaio-dev \
-    && apt-get update -y \
-    && apt-get upgrade -y \
+    # && apt-get update -y \
+    # && apt-get upgrade -y \
     && apt autoremove -y \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
@@ -132,8 +132,8 @@ COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 RUN apt update && \
     apt-get -y clean all && \
     apt-get -y update && \
-    apt-get -y upgrade && \
-    apt-get -y dist-upgrade && \
+    # apt-get -y upgrade && \
+    # apt-get -y dist-upgrade && \
     apt-get -y install openssh-client && \
     apt-get -y install sssd-tools && \
     apt-get -y install wget && \
