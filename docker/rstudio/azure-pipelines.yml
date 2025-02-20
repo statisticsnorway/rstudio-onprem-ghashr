@@ -57,9 +57,6 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-      # Fix for sparse-checkout
-      - checkout: self
-        sparseCheckout: false
 
       - template: docker/docker-build-image-and-push-to-gcr.yml@templates
         parameters:
