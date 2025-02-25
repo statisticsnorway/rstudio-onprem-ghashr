@@ -32,6 +32,10 @@ variables:
   - name: imageName
     value: 'eu.gcr.io/prod-bip/ssb/s782/rstudio-onprem'
 
+  # Disable git sparse-checkout
+  - name: AGENT_USE_SPARSE_CHECKOUT_IN_CHECKOUT_TASK
+    value: false
+
   - name: imageNameNexus
     value: 'nexus.ssb.no:8437/prod-bip/ssb/s782/rstudio-onprem'
 
