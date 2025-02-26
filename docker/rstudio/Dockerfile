@@ -75,6 +75,7 @@ RUN apt-get install -y \
 # Set R environment variables
 ENV R_HOME=/usr/local/lib/R
 ENV R_LIBS_USER=/usr/local/lib/R/library
+ENV JAVA_HOME="/usr/lib/jvm/java-${openjdk_version}-openjdk-amd64"
 
 # Setting up environment variables for Oracle
 ENV OCI_INC=/usr/include/oracle/21/client64
