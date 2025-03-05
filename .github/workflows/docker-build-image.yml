@@ -24,15 +24,15 @@ on:
     paths: 
       - 'docker/**'
       - '.github/workflows/docker-build-image.yml'
-#   pull_request:
-#     paths: 
-#       - 'docker/**'
-#       - '.github/workflows/docker-build-image.yml'
+  pull_request:
+    paths: 
+      - 'docker/**'
+      - '.github/workflows/docker-build-image.yml'
 
 env:
-  REGISTRY: europe-north1-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/itinfra-docker
+  REGISTRY: europe-north1-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}
   IMAGE_NAME: rstudio-onprem  # TODO: set this to your preferred image name
-  TEAM_NAME:    # TODO: set this to you teams name
+  TEAM_NAME: itinfra   # TODO: set this to you teams name
   
   TAG: ${{ github.ref_name }}-${{ github.sha }}
 
@@ -75,10 +75,6 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value={{branch}}-{{sha}}
-          type=raw,value=latest
-          type=raw,value={{branch}}-{{date 'YYYYMMDDHHmmss'}}
-
           type=ref,event=branch
           type=ref,event=pr
           type=raw,value=latest,enable={{is_default_branch}}
@@ -98,3 +94,96 @@ jobs:
         labels: ${{ steps.build_metadata.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+  deploy_staging:
+      needs: rstudio-onprem-build
+      if: github.ref == 'refs/heads/main'  # Only run on push to main
+      runs-on: self-hosted-staging
+      steps:
+        - name: Pull latest Docker image
+          run: |
+            IMAGE=${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}:latest
+            echo "Pulling $IMAGE"
+            docker pull $IMAGE
+
+        - name: Remove dangling images
+          run: docker image prune --force
+
+        - name: Clone and update repo
+          run: |
+            REPO="$HOME/rstudio-onprem-ghr-test"
+            if ! [ -d "$REPO" ]; then
+                echo "Cloning repo..."
+                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
+                mkdir -p $HOME/secrets/statbank-authenticator
+                mkdir -p $HOME/cron
+                chmod 1777 $HOME/cron
+            fi
+          
+            cd $REPO
+            git stash
+            git pull
+
+        - name: Deploy Service
+          run: |
+            SERVICE_FILE=/etc/systemd/system/rstudio.service
+            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
+                echo "Service files match, restarting service."
+                sudo systemctl restart rstudio.service
+            else
+                echo "Updating service file..."
+                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
+                sudo systemctl enable rstudio.service
+                sudo systemctl start rstudio.service
+            fi
+
+  deploy_prod:
+      needs: rstudio-onprem-build
+      if: startsWith(github.ref, 'refs/tags/')
+      runs-on: self-hosted-prod
+
+      steps:
+        - name: Clone and update repo
+          run: |
+            REPO="$HOME/rstudio-onprem-ghr-test"
+            if ! [ -d "$REPO" ]; then
+                echo "Cloning repo..."
+                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
+                mkdir -p $HOME/secrets/statbank-authenticator
+                mkdir -p $HOME/cron
+                chmod 1777 $HOME/cron
+            fi
+          
+            cd $REPO
+            git stash
+            git pull
+
+        - name: Get latest tag
+          run: |
+            cd $HOME/rstudio-onprem-ghr-test
+            git fetch --tags
+            TAG=`git describe --tags`
+            echo "Found tag $TAG"
+            sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
+
+        - name: Pull Docker image
+          run: |
+            IMAGE=${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}:$TAG
+            echo "Pulling $IMAGE"
+            docker pull $IMAGE
+
+        - name: Remove dangling images
+          run: docker image prune --force
+
+        - name: Deploy Service
+          run: |
+            SERVICE_FILE=/etc/systemd/system/rstudio.service
+            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
+                echo "Service files match, restarting service."
+                sudo systemctl restart rstudio.service
+            else
+                echo "Updating service file..."
+                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
+                sudo systemctl enable rstudio.service
+                sudo systemctl start rstudio.service
+            fi
