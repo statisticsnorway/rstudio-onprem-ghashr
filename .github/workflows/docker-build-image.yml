@@ -98,7 +98,7 @@ jobs:
   deploy_staging:
       needs: rstudio-onprem-build
       if: github.ref == 'refs/heads/main'  # Only run on push to main
-      runs-on: self-hosted-staging
+      runs-on: sl-rstudio-t2
       steps:
         - name: Pull latest Docker image
           run: |
@@ -140,7 +140,7 @@ jobs:
   deploy_prod:
       needs: rstudio-onprem-build
       if: startsWith(github.ref, 'refs/tags/')
-      runs-on: self-hosted-prod
+      runs-on: sl-rstudio-p3
 
       steps:
         - name: Clone and update repo
