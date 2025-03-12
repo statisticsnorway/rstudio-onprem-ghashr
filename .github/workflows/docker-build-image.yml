@@ -35,6 +35,7 @@ env:
   TEAM_NAME: itinfra   # TODO: set this to you teams name
   
   TAG: ${{ github.ref_name }}-${{ github.sha }}
+  nexusimageName: nexus.ssb.no:8437/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}
 
 jobs:
 
@@ -102,7 +103,7 @@ jobs:
       steps:
         - name: Pull latest Docker image
           run: |
-            IMAGE=${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}:latest
+            IMAGE=${{ env.nexusimageName }}:latest
             echo "Pulling $IMAGE"
             docker pull $IMAGE
 
@@ -168,7 +169,7 @@ jobs:
 
         - name: Pull Docker image
           run: |
-            IMAGE=${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}:$TAG
+            IMAGE=${{ env.nexusimageName }}:$TAG
             echo "Pulling $IMAGE"
             docker pull $IMAGE
 
