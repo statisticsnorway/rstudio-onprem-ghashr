@@ -47,7 +47,6 @@ jobs:
     #   semver_image_tag: ${{ steps.metadata.outputs.version }}
     env: 
       NEXUS_IMAGE_NAME: nexus.ssb.no:8437/${{ secrets.GAR_PROJECT_ID }}/${{ TEAM_NAME }}-docker/${{ IMAGE_NAME }}
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
