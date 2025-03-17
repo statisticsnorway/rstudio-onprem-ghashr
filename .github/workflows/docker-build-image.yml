@@ -1,0 +1,201 @@
+# This workflow will build and push a new Docker image to the default Artifact Registry in SSB.
+#
+# Overview:
+# 1. Authenticate to Google Cloud
+# 2. Authenticate to Artifact Registry
+# 3. Build and publish a docker image to Google Artifact Registry
+# 
+# To configure this workflow:
+# 1. Change the values for the IMAGE_NAME and TEAM_NAME environment variables (below).
+# 2. The image will be tagged with the git commit hash and latest. To override the default tags, add tags to the build_metadata step.
+#
+# This workflow is tailored for SSB´s setup, however if you wish to use this in a non SSB context ensure/change the following:
+# 1. Create GitHub secrets for GAR_PROJECT_NUMBER and GAR_PROJECT_ID (Number and ID for the Artifact Registry project).
+# 2. Create and configure Workload Identity Federation for GitHub.
+
+name: Docker Image CI
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - "main"
+    paths: 
+      - 'docker/**'
+      - '.github/workflows/docker-build-image.yml'
+  pull_request:
+    paths: 
+      - 'docker/**'
+      - '.github/workflows/docker-build-image.yml'
+
+env:
+  REGISTRY: europe-north1-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}
+  IMAGE_NAME: rstudio-onprem  # TODO: set this to your preferred image name
+  TEAM_NAME: itinfra-bakkesyst   # TODO: set this to you teams name
+  
+  TAG: ${{ github.ref_name }}-${{ github.sha }}
+
+jobs:
+
+  rstudio-onprem-build:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    # outputs:
+    #   semver_image_tag: ${{ steps.metadata.outputs.version }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2.1.2
+      with:
+        workload_identity_provider: "projects/${{ secrets.GAR_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/gh-actions/providers/gh-actions"
+        service_account: "gh-actions-${{ env.TEAM_NAME}}@${{ secrets.GAR_PROJECT_ID }}.iam.gserviceaccount.com"
+        token_format: access_token
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Artifact Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: "oauth2accesstoken"
+        password: "${{ steps.auth.outputs.access_token }}"
+
+    - name: Extract build metadata for Docker
+      id: build_metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=semver,pattern=v{{version}}
+          type=semver,pattern=v{{major}}.{{minor}}
+          type=semver,pattern=v{{major}}
+          type=raw,value=${{ env.TAG }}, enable=true
+
+    - name: Build and push docker image to Artifact Registry
+      uses: docker/build-push-action@v5
+      with:
+        context: docker/rstudio
+        provenance: false
+        file: docker/rstudio/Dockerfile
+        push: true
+        tags: ${{ steps.build_metadata.outputs.tags }}
+        labels: ${{ steps.build_metadata.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy_staging:
+      needs: rstudio-onprem-build
+      if: github.ref == 'refs/heads/main'  # Only run on push to main
+      runs-on: sl-rstudio-t2
+      env: 
+        IMAGE_NAME: rstudio-onprem
+        TEAM_NAME: itinfra-bakkesyst
+      steps:
+        - name: Set nexusimageName variable
+          run: echo "nexusimageName=nexus.ssb.no:8437/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+
+        - name: Pull latest Docker image
+          run: |
+            IMAGE=${{ env.nexusimageName }}:latest
+            echo "Pulling $IMAGE"
+            docker pull $IMAGE
+
+        - name: Remove dangling images
+          run: docker image prune --force
+
+        - name: Clone and update repo
+          run: |
+            REPO="$HOME/rstudio-onprem-ghr-test"
+            if ! [ -d "$REPO" ]; then
+                echo "Cloning repo..."
+                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
+                mkdir -p $HOME/secrets/statbank-authenticator
+                mkdir -p $HOME/cron
+                chmod 1777 $HOME/cron
+            fi
+          
+            cd $REPO
+            git stash
+            git pull
+
+        - name: Deploy Service
+          run: |
+            SERVICE_FILE=/etc/systemd/system/rstudio.service
+            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
+                echo "Service files match, restarting service."
+                sudo systemctl restart rstudio.service
+            else
+                echo "Updating service file..."
+                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
+                sudo systemctl enable rstudio.service
+                sudo systemctl start rstudio.service
+            fi
+
+  deploy_prod:
+      needs: rstudio-onprem-build
+      if: startsWith(github.ref, 'refs/tags/')
+      runs-on: sl-rstudio-p3
+      env: 
+        IMAGE_NAME: rstudio-onprem
+        TEAM_NAME: itinfra-bakkesyst
+
+      steps:
+        - name: Set nexusimageName variable
+          run: echo "nexusimageName=nexus.ssb.no:8437/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+
+        - name: Clone and update repo
+          run: |
+            REPO="$HOME/rstudio-onprem-ghr-test"
+            if ! [ -d "$REPO" ]; then
+                echo "Cloning repo..."
+                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
+                mkdir -p $HOME/secrets/statbank-authenticator
+                mkdir -p $HOME/cron
+                chmod 1777 $HOME/cron
+            fi
+          
+            cd $REPO
+            git stash
+            git pull
+
+        - name: Get latest tag
+          run: |
+            cd $HOME/rstudio-onprem-ghr-test
+            git fetch --tags
+            TAG=`git describe --tags`
+            echo "Found tag $TAG"
+            sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
+
+        - name: Pull Docker image
+          run: |
+            IMAGE=${{ env.nexusimageName }}:$TAG
+            echo "Pulling $IMAGE"
+            docker pull $IMAGE
+
+        - name: Remove dangling images
+          run: docker image prune --force
+
+        - name: Deploy Service
+          run: |
+            SERVICE_FILE=/etc/systemd/system/rstudio.service
+            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
+                echo "Service files match, restarting service."
+                sudo systemctl restart rstudio.service
+            else
+                echo "Updating service file..."
+                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
+                sudo systemctl enable rstudio.service
+                sudo systemctl start rstudio.service
+            fi

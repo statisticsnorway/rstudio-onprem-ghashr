@@ -50,7 +50,6 @@ RUN apt-get install -y \
     libgandiva-glib-dev=${libarrow_version}-1 \
     libparquet-dev=${libarrow_version}-1 \
     libparquet-glib-dev=${libarrow_version}-1 \
-    
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
