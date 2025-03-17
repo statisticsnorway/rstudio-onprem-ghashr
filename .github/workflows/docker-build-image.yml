@@ -110,7 +110,7 @@ jobs:
           run: echo "DOCKER_CONFIG=$HOME/.docker" >> $GITHUB_ENV
 
         - name: Docker Login to Nexus
-          run: echo "$DOCKER_PASSWORD" | docker login nexus.ssb.no:8439 --username "$DOCKER_USERNAME" --password-stdin
+          run: echo "$DOCKER_PASSWORD" | docker login nexus.ssb.no:8439 --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
           env:
             DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
             DOCKER_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
