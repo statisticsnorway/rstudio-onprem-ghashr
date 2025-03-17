@@ -105,6 +105,13 @@ jobs:
       steps:
         - name: Set nexusimageName variable
           run: echo "nexusimageName=nexus.ssb.no:8439/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+        
+        - name: Docker Login to Nexus
+          run: echo "$DOCKER_PASSWORD" | docker login nexus.ssb.no:8439 --username "$DOCKER_USERNAME" --password-stdin
+          env:
+            DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+            DOCKER_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        
 
         - name: Pull latest Docker image
           run: |
