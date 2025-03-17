@@ -32,7 +32,7 @@ on:
 env:
   REGISTRY: europe-north1-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}
   IMAGE_NAME: rstudio-onprem  # TODO: set this to your preferred image name
-  TEAM_NAME: itinfra   # TODO: set this to you teams name
+  TEAM_NAME: itinfra-bakkesyst   # TODO: set this to you teams name
   
   TAG: ${{ github.ref_name }}-${{ github.sha }}
 
@@ -101,7 +101,7 @@ jobs:
       runs-on: sl-rstudio-t2
       env: 
         IMAGE_NAME: rstudio-onprem
-        TEAM_NAME: itinfra
+        TEAM_NAME: itinfra-bakkesyst
       steps:
         - name: Set nexusimageName variable
           run: echo "nexusimageName=nexus.ssb.no:8437/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
@@ -147,6 +147,9 @@ jobs:
       needs: rstudio-onprem-build
       if: startsWith(github.ref, 'refs/tags/')
       runs-on: sl-rstudio-p3
+      env: 
+        IMAGE_NAME: rstudio-onprem
+        TEAM_NAME: itinfra-bakkesyst
 
       steps:
         - name: Set nexusimageName variable
