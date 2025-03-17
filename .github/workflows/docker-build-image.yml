@@ -108,6 +108,7 @@ jobs:
 
         - name: Pull latest Docker image
           run: |
+            whoami
             set -ex
             IMAGE=${{ env.nexusimageName }}:latest
             echo "Pulling $IMAGE"
