@@ -108,6 +108,7 @@ jobs:
 
         - name: Pull latest Docker image
           run: |
+            set -ex
             IMAGE=${{ env.nexusimageName }}:latest
             echo "Pulling $IMAGE"
             docker pull $IMAGE
@@ -117,6 +118,7 @@ jobs:
 
         - name: Clone and update repo
           run: |
+            set -ex
             REPO="$HOME/rstudio-onprem-ghr-test"
             if ! [ -d "$REPO" ]; then
                 echo "Cloning repo..."
@@ -132,6 +134,7 @@ jobs:
 
         - name: Deploy Service
           run: |
+            set -ex
             SERVICE_FILE=/etc/systemd/system/rstudio.service
             if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
                 echo "Service files match, restarting service."
@@ -157,6 +160,7 @@ jobs:
 
         - name: Clone and update repo
           run: |
+            set -ex
             REPO="$HOME/rstudio-onprem-ghr-test"
             if ! [ -d "$REPO" ]; then
                 echo "Cloning repo..."
@@ -172,6 +176,7 @@ jobs:
 
         - name: Get latest tag
           run: |
+            set -ex
             cd $HOME/rstudio-onprem-ghr-test
             git fetch --tags
             TAG=`git describe --tags`
@@ -180,6 +185,7 @@ jobs:
 
         - name: Pull Docker image
           run: |
+            set -ex
             IMAGE=${{ env.nexusimageName }}:$TAG
             echo "Pulling $IMAGE"
             docker pull $IMAGE
@@ -189,6 +195,7 @@ jobs:
 
         - name: Deploy Service
           run: |
+            set -ex
             SERVICE_FILE=/etc/systemd/system/rstudio.service
             if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
                 echo "Service files match, restarting service."
