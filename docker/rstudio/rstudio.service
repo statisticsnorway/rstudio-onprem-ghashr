@@ -6,8 +6,8 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-User=rstudio
-WorkingDirectory=/home/rstudio/rstudio-onprem/docker/rstudio
+User=github-runner
+WorkingDirectory=/home/github-runner/rstudio-onprem-ghr-test/docker/rstudio
 ExecStart=/bin/docker compose -f docker-compose.yml up -d
 ExecStop=/bin/docker compose -f docker-compose.yml stop
 
