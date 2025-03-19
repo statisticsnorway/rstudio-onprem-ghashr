@@ -194,7 +194,13 @@ jobs:
             TAG=`git describe --tags`
             echo "Found tag $TAG"
             sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
-
+        
+        - name: Docker Login to Nexus
+          run: docker login "nexus.ssb.no:8439" --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+          env:
+            DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+            DOCKER_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        
         - name: Pull Docker image
           run: |
             set -ex
