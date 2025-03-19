@@ -195,7 +195,7 @@ jobs:
             echo "Found tag $TAG"
             sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
         
-        - name: Docker Login to Nexus
+        - name: Docker Login to Nexus repo
           run: docker login "nexus.ssb.no:8439" --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
           env:
             DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
