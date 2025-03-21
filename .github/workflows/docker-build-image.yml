@@ -217,6 +217,7 @@ jobs:
         - name: Deploy Service
           run: |
             set -ex
+            REPO="$HOME/rstudio-onprem-ghr-test"
             SERVICE_FILE=/etc/systemd/system/rstudio.service
             if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
                 echo "Service files match, restarting service."
