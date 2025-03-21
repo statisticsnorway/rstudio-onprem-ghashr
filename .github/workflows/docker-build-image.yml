@@ -190,8 +190,8 @@ jobs:
           run: |
             set -ex
             cd $HOME/rstudio-onprem-ghr-test
-            git fetch --tags
-            TAG=`git describe --tags`
+            git tag --sort=-v:refname | head -n 1
+            TAG=`git tag --sort=-v:refname | head -n 1`
             echo "Found tag $TAG"
             sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
         
