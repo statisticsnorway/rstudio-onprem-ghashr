@@ -195,6 +195,9 @@ jobs:
             echo "Found tag $TAG"
             sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
         
+        - name: Set DOCKER_CONFIG variable
+          run: echo "DOCKER_CONFIG=$HOME/.docker" >> $GITHUB_ENV
+
         - name: Docker Login to Nexus repo
           run: docker login "nexus.ssb.no:8439" --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
           env:
