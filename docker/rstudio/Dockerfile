@@ -1,4 +1,4 @@
-FROM rocker/geospatial:4.4.1
+FROM rocker/geospatial:4.4.2
 
 USER root
 
@@ -31,25 +31,25 @@ RUN echo "Package: libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-
 
 # Installer Apache Arrow-pakkene med den spesifikke versjonen
 RUN apt-get install -y \
-    libarrow-dev=${libarrow_version}-1 \
-    libarrow-glib-dev=${libarrow_version}-1 \
-    libarrow-dataset-dev=${libarrow_version}-1 \
-    libarrow-dataset-glib-dev=${libarrow_version}-1 \
-    libarrow-acero-dev=${libarrow_version}-1 \
-    libarrow-flight-dev=${libarrow_version}-1 \
-    libarrow-flight-glib-dev=${libarrow_version}-1 \
-    libarrow-flight-sql-dev=${libarrow_version}-1 \
-    libarrow-flight-sql-glib-dev=${libarrow_version}-1 \
-    gir1.2-arrow-dataset-1.0=${libarrow_version}-1 \
-    gir1.2-arrow-flight-1.0=${libarrow_version}-1 \
-    gir1.2-arrow-flight-sql-1.0=${libarrow_version}-1 \
-    gir1.2-arrow-1.0=${libarrow_version}-1 \
-    gir1.2-gandiva-1.0=${libarrow_version}-1 \
-    gir1.2-parquet-1.0=${libarrow_version}-1 \
-    libgandiva-dev=${libarrow_version}-1 \
-    libgandiva-glib-dev=${libarrow_version}-1 \
-    libparquet-dev=${libarrow_version}-1 \
-    libparquet-glib-dev=${libarrow_version}-1 \
+    # libarrow-dev=${libarrow_version}-1 \
+    # libarrow-glib-dev=${libarrow_version}-1 \
+    # libarrow-dataset-dev=${libarrow_version}-1 \
+    # libarrow-dataset-glib-dev=${libarrow_version}-1 \
+    # libarrow-acero-dev=${libarrow_version}-1 \
+    # libarrow-flight-dev=${libarrow_version}-1 \
+    # libarrow-flight-glib-dev=${libarrow_version}-1 \
+    # libarrow-flight-sql-dev=${libarrow_version}-1 \
+    # libarrow-flight-sql-glib-dev=${libarrow_version}-1 \
+    # gir1.2-arrow-dataset-1.0=${libarrow_version}-1 \
+    # gir1.2-arrow-flight-1.0=${libarrow_version}-1 \
+    # gir1.2-arrow-flight-sql-1.0=${libarrow_version}-1 \
+    # gir1.2-arrow-1.0=${libarrow_version}-1 \
+    # gir1.2-gandiva-1.0=${libarrow_version}-1 \
+    # gir1.2-parquet-1.0=${libarrow_version}-1 \
+    # libgandiva-dev=${libarrow_version}-1 \
+    # libgandiva-glib-dev=${libarrow_version}-1 \
+    # libparquet-dev=${libarrow_version}-1 \
+    # libparquet-glib-dev=${libarrow_version}-1 \
     # add git repo
     && add-apt-repository -y ppa:git-core/ppa \
     && gpg-agent --daemon \
@@ -58,13 +58,13 @@ RUN apt-get install -y \
     && apt-get -y update  \
     # installing texlive via apt instead, the built-in install_texlive doesn't supply everything
     #&& apt-get -y install texlive-full \
-    && apt-get install -y `apt-get --assume-no install texlive-full | \
-		awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
-		tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
+    # && apt-get install -y `apt-get --assume-no install texlive-full | \
+	# 	awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
+	# 	tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
     # installing yad (yet another dialog)
     && apt-get -y install yad  \
     && apt-get install -y iputils-ping  \
-    && apt-get install -y --no-install-recommends libaio1 libaio-dev \
+    # && apt-get install -y --no-install-recommends libaio1 libaio-dev \
     # && apt-get update -y \
     # && apt-get upgrade -y \
     && apt autoremove -y \
