@@ -97,67 +97,59 @@ jobs:
         cache-to: type=gha,mode=max
 
   deploy_staging:
-      needs: rstudio-onprem-build
-      if: github.ref == 'refs/heads/main'  # Only run on push to main
-      runs-on: sl-rstudio-t2
-      env: 
-        IMAGE_NAME: rstudio-onprem
-        TEAM_NAME: itinfra-bakkesyst
-      steps:
-        - name: Set nexusimageName variable
-          run: echo "nexusimageName=nexus.ssb.no:8439/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
-        
-        - name: Set DOCKER_CONFIG variable
-          run: echo "DOCKER_CONFIG=$HOME/.docker" >> $GITHUB_ENV
+    needs: rstudio-onprem-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: sl-rstudio-t2   #  This is where the GitHub runner is hosted ; *not* the staging host itself
+    env:
+      IMAGE_NAME: rstudio-onprem
+      TEAM_NAME: itinfra-bakkesyst
 
-        - name: Docker Login to Nexus
-          run: docker login "nexus.ssb.no:8439" --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
-          env:
-            DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-            DOCKER_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        
+    steps:
+      - name: Deploy to staging via SSH
+        run: |
+          set -euo pipefail
 
-        - name: Pull latest Docker image
-          run: |
-            pwd
-            set -ex
-            IMAGE=${{ env.nexusimageName }}:latest
-            echo "Pulling $IMAGE"
-            docker pull $IMAGE
+          # shellcheck disable=SC2029
+          ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no rstudio@<test-host>.ssb.no <<'REMOTE'
+            set -euo pipefail
 
-        - name: Remove dangling images
-          run: docker image prune --force
+            export IMAGE_NAME="rstudio-onprem"
+            export TEAM_NAME="itinfra-bakkesyst"
+            export DOCKER_CONFIG="$HOME/.docker"
 
-        - name: Clone and update repo
-          run: |
-            set -ex
+            NEXUS_IMAGE="nexus.ssb.no:8439/${GAR_PROJECT_ID}/${TEAM_NAME}-docker/${IMAGE_NAME}:latest"
+
+            echo "Pulling $NEXUS_IMAGE"
+            docker login nexus.ssb.no:8439 -u "$NEXUS_USERNAME" -p "$NEXUS_PASSWORD"
+            docker pull "$NEXUS_IMAGE"
+            docker image prune --force
+
             REPO="$HOME/rstudio-onprem-ghr-test"
-            if ! [ -d "$REPO" ]; then
-                echo "Cloning repo..."
-                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
-                mkdir -p $HOME/secrets/statbank-authenticator
-                mkdir -p $HOME/cron
-                chmod 1777 $HOME/cron
+            if [ ! -d "$REPO" ]; then
+              git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git "$REPO"
+              mkdir -p "$HOME/secrets/statbank-authenticator" "$HOME/cron"
+              chmod 1777 "$HOME/cron"
             fi
-          
-            cd $REPO
+            cd "$REPO"
             git stash
             git pull
 
-        - name: Deploy Service
-          run: |
-            set -ex
-            REPO="$HOME/rstudio-onprem-ghr-test"
             SERVICE_FILE=/etc/systemd/system/rstudio.service
             if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
-                echo "Service files match, restarting service."
-                sudo systemctl restart rstudio.service
+              echo "Service files match — restarting service"
+              sudo systemctl restart rstudio.service
             else
-                echo "Updating service file..."
-                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
-                sudo systemctl enable rstudio.service
-                sudo systemctl start rstudio.service
+              echo "Updating service file and starting service"
+              sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
+              sudo systemctl enable rstudio.service
+              sudo systemctl start rstudio.service
             fi
+          REMOTE
+        env:
+          GAR_PROJECT_ID:  ${{ secrets.GAR_PROJECT_ID }}
+          NEXUS_USERNAME:  ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD:  ${{ secrets.NEXUS_PASSWORD }}
+          SSH_KEY:         ${{ secrets.RSTUDIO_STAGING_SSH_KEY }}   # private key in PEM format
 
   deploy_prod:
       needs: rstudio-onprem-build
