@@ -80,6 +80,8 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 USER root
 
+RUN apt update && apt upgrade -y
+
 # Install R using rocker's install scripts
 RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-versioned2.git /tmp/rocker-versioned2 && \
     cp -r /tmp/rocker-versioned2/scripts/ /rocker_scripts/ && \
@@ -138,7 +140,15 @@ RUN /opt/install-system-libs.sh && \
     # Clean
     rm -rf /var/lib/apt/lists/*
 
-RUN R -e "install.packages('arrow')"
+# RUN R -e "install.packages('arrow')"
+
+# Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også apt-cache madison libarrow-dev
+ARG ARROW_VERSION="18.1.0"
+ENV ARROW_VERSION=${ARROW_VERSION}
+
+COPY scripts/install-arrow.sh /opt/install-arrow.sh
+RUN chmod +x /opt/install-arrow.sh
+RUN /opt/install-arrow.sh
 
 EXPOSE 8787
 
