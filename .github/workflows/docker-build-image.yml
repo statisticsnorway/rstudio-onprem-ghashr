@@ -99,7 +99,7 @@ jobs:
   deploy_staging:
     needs: rstudio-onprem-build
     if: github.ref == 'refs/heads/main'
-    runs-on: sl-rstudio-t2   #  This is where the GitHub runner is hosted ; *not* the staging host itself
+    runs-on: pl-ghashr-t1   #  This is where the GitHub runner is hosted ; *not* the staging host itself
     env:
       IMAGE_NAME: rstudio-onprem
       TEAM_NAME: itinfra-bakkesyst
@@ -110,7 +110,7 @@ jobs:
           set -euo pipefail
 
           # shellcheck disable=SC2029
-          ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no rstudio@<test-host>.ssb.no <<'REMOTE'
+          ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no rstudio@sl-rstudio-t2.ssb.no <<'REMOTE'
             set -euo pipefail
 
             export IMAGE_NAME="rstudio-onprem"
