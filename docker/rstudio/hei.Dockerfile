@@ -48,7 +48,7 @@ RUN chmod -R +x /opt/ && \
 
 ENV PATH="${PATH}:${HOME}/.local/bin:${HOME}/.krew/bin:${HOME}/work/.local/pipx/bin"
 
-# Download git completion and git prompt scripts
+# Download git completion and git prompt scripts (sjekke om dete er nødvendig mtp at vi kopierer inn bashrc fra L219)
 RUN curl -o ${HOME}/.git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash && \
     curl -o ${HOME}/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh && \
     chown ${USERNAME}:${GROUPNAME} ${HOME}/.git-completion.bash ${HOME}/.git-prompt.sh && \
@@ -80,7 +80,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 USER root
 
-RUN apt update && apt upgrade -y
+RUN apt-get upgrade --fix-missing -y
 
 # Install R using rocker's install scripts
 RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-versioned2.git /tmp/rocker-versioned2 && \
@@ -125,7 +125,6 @@ RUN /opt/install-system-libs.sh && \
     if ! [[ -z "${CUDA_VERSION}" ]]; then /rocker_scripts/config_R_cuda.sh; fi && \
     # Install useful additional packages
     install2.r --error \
-    # arrow \
     devtools \
     DBI \
     lintr \
@@ -140,19 +139,112 @@ RUN /opt/install-system-libs.sh && \
     # Clean
     rm -rf /var/lib/apt/lists/*
 
-# RUN R -e "install.packages('arrow')"
 
-# Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også apt-cache madison libarrow-dev
+# Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også "apt-cache madison libarrow-dev"
 ARG ARROW_VERSION="18.1.0"
 ENV ARROW_VERSION=${ARROW_VERSION}
-
-COPY scripts/install-arrow.sh /opt/install-arrow.sh
-RUN chmod +x /opt/install-arrow.sh
 RUN /opt/install-arrow.sh
+
+# Setting up environment variables for Oracle
+ENV OCI_INC=/usr/include/oracle/21/client64
+ENV OCI_LIB=/usr/lib/oracle/21/client64/lib
+ENV ORACLE_HOME=/usr/lib/oracle/21/client64
+ENV TNS_ADMIN=/usr/lib/oracle/21/client64/lib/network
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/lib/oracle/21/client64/lib
+
+# Downloading oracle instant-client components and saving to /tmp
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm -P /tmp/ && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/216000/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm -P /tmp/
+
+# Installing oracle-instantclient components using alien
+RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-devel-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
+    alien -i /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm
+
+# Copy the ROracle installation file into the container
+COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
+
+COPY r-packages-src.R /tmp/r-packages-src.R
+
+# Install additional packages from source
+RUN Rscript /tmp/r-packages-src.R && \
+    rm -rf /tmp/downloaded_packages/ /tmp/*.rds
+
+RUN R --no-echo -e 'cat(Sys.getenv("R_HOME"), Sys.getenv("R_LIBS_USER"),"\n");cat(.libPaths(),"\n"); print(installed.packages()[,c("Package", "Version")])'
+
+# Change default R repo (used by renv)
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+
+# Installing sssd-tools (required for authentication)
+RUN apt update && \
+    apt-get -y clean all && \
+    apt-get -y update && \
+    # apt-get -y upgrade && \
+    # apt-get -y dist-upgrade && \
+    apt-get -y install openssh-client && \
+    apt-get -y install sssd-tools && \
+    apt-get -y install wget && \
+    apt-get -y install cron
+
+# Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract
+RUN apt-get update -y && \
+    apt-get install -y software-properties-common && \
+    apt-get install -y libpoppler-cpp-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-nor && \
+    apt-get install -y libmagick++-dev
+
+# Added dependencies for ProtoBuf
+RUN apt-get update -y && \
+    apt-get install -y libprotoc-dev libprotobuf-dev protobuf-compiler
+
+# add tnsnames.ora to oracle path
+RUN ln -s /ssb/share/etc/tnsnames.ora /usr/lib/oracle/21/client64/lib/network/tnsnames.ora
+
+# symlink to /ssb/share/etc/stamme_variabel
+RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
+
+RUN mkdir -p /usr/local/share/etc/
+COPY bashrc.felles /usr/local/share/etc/bashrc.felles
+
+ENV FELLES=/ssb/bruker/felles
+
+# adding a custom bashrc with git branch in PS1
+COPY default-bashrc /etc/skel/.bashrc
+
+COPY check-git-config.bash /usr/local/bin/check-git-config.sh
+RUN chmod +x /usr/local/bin/check-git-config.sh
+
+# Install ssb-gitconfig.py script
+RUN wget -O /usr/local/bin/ssb-gitconfig.py https://raw.githubusercontent.com/statisticsnorway/kvakk-git-tools/main/kvakk_git_tools/ssb_gitconfig.py
+RUN chmod +x /usr/local/bin/ssb-gitconfig.py
+
+# Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
+RUN printf "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
+
+# Use proxy for https connections, this must happen last
+# ENV https_proxy=http://proxy.ssb.no:3128
+# ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
+
+# Set Dapla environment variables used to identify the service.
+ENV DAPLA_SERVICE=R_STUDIO
+ENV DAPLA_REGION=ON_PREM
+
+# Custom startup script which calls the original startup script /init at the end
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+RUN /rocker_scripts/install_verse.sh
 
 EXPOSE 8787
 
-CMD ["/init"]
+CMD ["/start.sh"]
 
 # COPY scripts/bin/ /rocker_scripts/bin/
 # COPY scripts/setup_R.sh /rocker_scripts/setup_R.sh

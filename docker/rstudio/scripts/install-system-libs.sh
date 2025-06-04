@@ -29,4 +29,5 @@ apt_install \
     unzip \
     vim \
     wget \
-    tmux
+    tmux \
+    alien
