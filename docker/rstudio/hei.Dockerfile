@@ -242,6 +242,8 @@ RUN chmod +x /start.sh
 
 RUN /rocker_scripts/install_verse.sh
 
+RUN /rocker_scripts/install_texlive.sh
+
 EXPOSE 8787
 
 CMD ["/start.sh"]
