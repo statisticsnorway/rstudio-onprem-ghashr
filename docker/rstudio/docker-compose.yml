@@ -11,7 +11,7 @@ services:
       - "/ssb:/ssb"
 
         # Mounting /var/lib/sss so we can use sssd users from host (REQUIRED FOR PAM AUTHENTICATION)
-      - "/var/lib/sss:/var/lib/sss"
+      - "/var/lib/sss/pipes:/var/lib/sss/pipes"
       
       # Mounting /var/spool/cron/crontabs to hosts ~/cron for persistant crontabs
       - "~/cron:/var/spool/cron/crontabs"
