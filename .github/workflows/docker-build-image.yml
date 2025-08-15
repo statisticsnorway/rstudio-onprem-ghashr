@@ -142,7 +142,7 @@ jobs:
       - name: Determine deploy parameters
         id: params
         run: |
-          echo "target_hosts=sl-rstudio-p3.ssb.no" >> $GITHUB_OUTPUT
+          echo 'target_hosts=["sl-rstudio-p3.ssb.no"]' >> $GITHUB_OUTPUT
 
       - name: Set repo_name
         id: repo_name
@@ -161,5 +161,5 @@ jobs:
             -H "Authorization: Bearer ${AWX_TOKEN}" \
             -d "$(jq -n \
               --arg repo_name   "${{ steps.repo_name.outputs.repo_name }}" \
-              --arg target_hosts "${{ steps.params.outputs.target_hosts }}" \
+              --argjson target_hosts "${{ steps.params.outputs.target_hosts }}" \
               '{extra_vars: {repo_name: $repo_name, target_hosts: $target_hosts}}')"
