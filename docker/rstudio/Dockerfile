@@ -1,80 +1,149 @@
-FROM rocker/geospatial:4.4.2
+FROM docker.io/library/ubuntu:noble
+
+# System-wide configuration
+SHELL ["/bin/bash", "-c"]
+ENV SHELL="/bin/bash"
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# Setup user & workspace
+ENV USERNAME="rstudio"
+ENV UID="1000"
+ENV GROUPNAME="users"
+ENV GID="100"
+ENV HOME="/home/${USERNAME}"
+ENV WORKSPACE_DIR="${HOME}/work"
+RUN groupmod -g ${GID} ${GROUPNAME} && \
+    # If user by ID 1000 already exists, remove it so we can re-create it
+    if id -u ${UID} >/dev/null 2>&1; then userdel -r $(getent passwd ${UID} | cut -d: -f1); fi && \
+    # Setup custom user with sudo rights
+    useradd ${USERNAME} --uid=${UID} -g ${GROUPNAME} --groups sudo -r --no-log-init --create-home && \
+    # Create workspace
+    mkdir -p ${WORKSPACE_DIR} && \
+    # Disable default sudo message when opening shell
+    touch ${HOME}/.sudo_as_admin_successful
+
+WORKDIR ${WORKSPACE_DIR}
 
 USER root
 
-ARG openjdk_version="17"
-ARG libarrow_version="18.1.0"
- 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
- 
-# Add Arrow repository and set up package pinning
-RUN apt-get update -y \
-    && apt-get -y upgrade \
-    && apt-get -y dist-upgrade \
-    # && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk-headless" ca-certificates-java \
-    && apt-get install -y --no-install-recommends "openjdk-${openjdk_version}-jdk" ca-certificates-java \
-    software-properties-common dirmngr build-essential wget curl libssl-dev libcurl4-openssl-dev libglpk-dev libgdal-dev libre2-dev \
-    apt-utils libudunits2-dev cmake lsb-release gpg-agent libssh-dev libsodium-dev gfortran cargo libcairo2-dev zlib1g-dev 
-    
-RUN wget "https://apache.jfrog.io/artifactory/arrow/ubuntu/pool/jammy/main/a/apache-arrow-apt-source/apache-arrow-apt-source_${libarrow_version}-1_all.deb" && \
-    apt-get update && \
-    apt-get install -y ./apache-arrow-apt-source_${libarrow_version}-1_all.deb && \
-    rm ./apache-arrow-apt-source_${libarrow_version}-1_all.deb && \
-    apt-get update
+## `../scripts` directory should be added by the --build-context flag like so:
+## docker build --build-context scripts=../scripts <REST>
+COPY scripts/ /opt/
 
-#  # Sjekk tilgjengelige versjoner for libarrow- dev (valgfritt, for feilsøking)
-RUN echo "=== apt-cache policy for libarrow-dev ===" && apt-cache policy libarrow-dev
+RUN chmod -R +x /opt/ && \
+    # Install essential system libraries
+    /opt/install-system-libs.sh && \
+    apt-get upgrade -y && \
+    # Generate locales
+    locale-gen nb_NO.UTF-8 && \
+    # Update default locale to Norwegian
+    update-locale LANG=nb_NO.UTF-8 && \
+    # Make sudo passwordless
+    echo '${USERNAME} ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    # Fix permissions
+    chown -R ${USERNAME}:${GROUPNAME} ${HOME} && \
+    chmod +x /opt/onyxia-init.sh && \
+    # Clean up
+    rm -rf /var/lib/apt/lists/*
 
-# # Sett opp apt-pinning for Apache Arrow
-RUN echo "Package: libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev gir1.2-arrow-1.0 gir1.2-arrow-dataset-1.0 gir1.2-arrow-flight-1.0 gir1.2-arrow-flight-sql-1.0 gir1.2-gandiva-1.0 gir1.2-parquet-1.0\nPin: version ${libarrow_version}\nPin-Priority: 1001" > /etc/apt/preferences.d/arrow-pinning && \
-    apt-get update
+ENV PATH="${PATH}:${HOME}/.local/bin:${HOME}/.krew/bin:${HOME}/work/.local/pipx/bin"
 
-# Installer Apache Arrow-pakkene med den spesifikke versjonen
-RUN apt-get install -y \
-    # libarrow-dev=${libarrow_version}-1 \
-    # libarrow-glib-dev=${libarrow_version}-1 \
-    # libarrow-dataset-dev=${libarrow_version}-1 \
-    # libarrow-dataset-glib-dev=${libarrow_version}-1 \
-    # libarrow-acero-dev=${libarrow_version}-1 \
-    # libarrow-flight-dev=${libarrow_version}-1 \
-    # libarrow-flight-glib-dev=${libarrow_version}-1 \
-    # libarrow-flight-sql-dev=${libarrow_version}-1 \
-    # libarrow-flight-sql-glib-dev=${libarrow_version}-1 \
-    # gir1.2-arrow-dataset-1.0=${libarrow_version}-1 \
-    # gir1.2-arrow-flight-1.0=${libarrow_version}-1 \
-    # gir1.2-arrow-flight-sql-1.0=${libarrow_version}-1 \
-    # gir1.2-arrow-1.0=${libarrow_version}-1 \
-    # gir1.2-gandiva-1.0=${libarrow_version}-1 \
-    # gir1.2-parquet-1.0=${libarrow_version}-1 \
-    # libgandiva-dev=${libarrow_version}-1 \
-    # libgandiva-glib-dev=${libarrow_version}-1 \
-    # libparquet-dev=${libarrow_version}-1 \
-    # libparquet-glib-dev=${libarrow_version}-1 \
-    # add git repo
-    && add-apt-repository -y ppa:git-core/ppa \
-    && gpg-agent --daemon \
-    # alien is a helper to install oracle instantclient
-    && apt-get install -y --no-install-recommends alien  \
-    && apt-get -y update  \
-    # installing texlive via apt instead, the built-in install_texlive doesn't supply everything
-    #&& apt-get -y install texlive-full \
-    # && apt-get install -y `apt-get --assume-no install texlive-full | \
-	# 	awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
-	# 	tr ' ' '\n' | grep -vP 'doc$' | grep -vP 'texlive-lang' | grep -vP 'latex-cjk' | tr '\n' ' '` \
-    # installing yad (yet another dialog)
-    && apt-get -y install yad  \
-    && apt-get install -y iputils-ping  \
-    # && apt-get install -y --no-install-recommends libaio1 libaio-dev \
-    # && apt-get update -y \
-    # && apt-get upgrade -y \
-    && apt autoremove -y \
-    && apt-get -y clean all \
-    && rm -rf /var/lib/apt/lists/*
+# Download git completion and git prompt scripts (sjekke om dete er nødvendig mtp at vi kopierer inn bashrc fra L219)
+RUN curl -o ${HOME}/.git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash && \
+    curl -o ${HOME}/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh && \
+    chown ${USERNAME}:${GROUPNAME} ${HOME}/.git-completion.bash ${HOME}/.git-prompt.sh && \
+    echo "source ~/.git-completion.bash" >> ${HOME}/.bashrc && \
+    echo "source ~/.git-prompt.sh" >> ${HOME}/.bashrc && \
+    echo 'export PS1="\[\e[1;32m\]\u@\h:\[\e[1;34m\]\w\[\e[1;31m\]\$(__git_ps1 \" (%s)\")\[\e[0m\]\$ "' >> ${HOME}/.bashrc
 
-# Set R environment variables
-ENV R_HOME=/usr/local/lib/R
-ENV R_LIBS_USER=/usr/local/lib/R/library
-ENV JAVA_HOME="/usr/lib/jvm/java-${openjdk_version}-openjdk-amd64"
+# Set locales
+ENV LANG=nb_NO.UTF-8
+ENV LANGUAGE=nb_NO:nb
+ENV LC_ALL=nb_NO.UTF-8
+
+USER 1000
+
+# Install gitconfig file from kvakk-git-tools
+RUN /opt/install-gitconfig.sh
+
+# R Config
+ARG R_VERSION="4.4.1"
+ENV R_VERSION=${R_VERSION}
+ENV R_HOME="/usr/local/lib/R"
+ENV DEFAULT_USER="${USERNAME}"
+
+# Java configuration
+ARG JAVA_VERSION="17"
+ENV JAVA_VERSION=${JAVA_VERSION}
+ENV JAVA_HOME="/usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+USER root
+
+RUN apt-get upgrade --fix-missing -y
+
+# Install R using rocker's install scripts
+RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-versioned2.git /tmp/rocker-versioned2 && \
+    cp -r /tmp/rocker-versioned2/scripts/ /rocker_scripts/ && \
+    chown -R ${USERNAME}:${GROUPNAME} /rocker_scripts/ && \
+    chmod -R 700 /rocker_scripts/ && \
+    /rocker_scripts/install_R_source.sh
+
+ENV CRAN="https://p3m.dev/cran/__linux__/noble/latest"
+
+# RStudio ENVs
+ENV S6_VERSION=v2.1.0.2
+ENV RSTUDIO_VERSION=stable
+ENV DEFAULT_USER=rstudio
+ENV PANDOC_VERSION=default
+ENV QUARTO_VERSION=default
+
+# LaTeX ENVs
+ENV CTAN_REPO=https://mirror.ctan.org/systems/texlive/tlnet
+ENV PATH=$PATH:/usr/local/texlive/bin/linux
+
+COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
+
+# Set up R (RSPM, OpenBLAS, littler, addtional packages)
+RUN /opt/install-java.sh
+    # Install R
+RUN /rocker_scripts/setup_R.sh
+    # Install RStudio
+RUN /rocker_scripts/install_quarto.sh 
+# Install geospatial packages
+RUN /rocker_scripts/install_tidyverse.sh
+# RUN /rocker_scripts/install_verse.sh
+RUN /rocker_scripts/install_geospatial.sh
+RUN /rocker_scripts/install_pandoc.sh
+RUN /rocker_scripts/install_rstudio.sh
+
+    # Re-install system libs that may have been removed by autoremove in rocker scripts
+RUN /opt/install-system-libs.sh && \
+    # Install additional system libs needed by R packages
+    /opt/install-system-libs-R.sh && \
+    # Configure R for CUDA if parent image has CUDA
+    if ! [[ -z "${CUDA_VERSION}" ]]; then /rocker_scripts/config_R_cuda.sh; fi && \
+    # Install useful additional packages
+    install2.r --error \
+    devtools \
+    DBI \
+    lintr \
+    quarto \
+    renv \
+    styler && \
+    unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
+    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
+    ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher && \
+    # Fix permissions
+    chown -R ${USERNAME}:${GROUPNAME} ${HOME} ${R_HOME} && \
+    # Clean
+    rm -rf /var/lib/apt/lists/*
+
+
+# Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også "apt-cache madison libarrow-dev"
+ARG ARROW_VERSION="18.1.0"
+ENV ARROW_VERSION=${ARROW_VERSION}
+RUN /opt/install-arrow.sh
 
 # Setting up environment variables for Oracle
 ENV OCI_INC=/usr/include/oracle/21/client64
@@ -97,36 +166,19 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-odbc-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-jdbc-21.6.0.0.0-1.x86_64.rpm && \
     alien -i /tmp/oracle-instantclient-tools-21.6.0.0.0-1.x86_64.rpm && \
-    # Must install sqlplus seperately because of an issue installing using alien
-    cd /tmp && \
-    rpm2cpio /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm | cpio -idmv && \
-    cp -r /tmp/usr/* /usr/ && \
-    rm -rf /tmp/usr && \
-    ldconfig && \
-    rm -rf /tmp/oracle-instantclient-*
+    alien -i /tmp/oracle-instantclient-sqlplus-21.6.0.0.0-1.x86_64.rpm
 
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
-# Copy Jwsacruncher
-COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
-
-# Copy R-script that installs packages from source
 COPY r-packages-src.R /tmp/r-packages-src.R
 
 # Install additional packages from source
-RUN Rscript /tmp/r-packages-src.R \
-    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-    # Doesn t work with Java11 - use a custom one
-    && unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip \
-    # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
-    && ln -s /opt/jwsacruncher-2.2.4/bin/jwsacruncher /usr/bin/jwsacruncher
+RUN Rscript /tmp/r-packages-src.R && \
+    rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
-RUN R --no-echo -e "cat(Sys.getenv('R_HOME'), Sys.getenv('R_LIBS_USER'),'\n');cat(.libPaths(),'\n'); print(installed.packages()[,c('Package', 'Version')])"
+RUN R --no-echo -e 'cat(Sys.getenv("R_HOME"), Sys.getenv("R_LIBS_USER"),"\n");cat(.libPaths(),"\n"); print(installed.packages()[,c("Package", "Version")])'
 
-# Change default R repo (used by renv)
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -158,15 +210,7 @@ RUN ln -s /ssb/share/etc/stamme_variabel /etc/profile.d/stamme_variabel
 RUN mkdir -p /usr/local/share/etc/
 COPY bashrc.felles /usr/local/share/etc/bashrc.felles
 
-# Set FELLES environment variable
 ENV FELLES=/ssb/bruker/felles
-ENV ARROW_S3=OFF
-ENV ARROW_THIRDPARTY_DEPENDENCY_DIR=/ssb/bruker/felles/R_pakker/arrow
-
-# Set localtime to Europe/Oslo
-ENV TZ=Europe/Oslo
-RUN rm -f /etc/localtime && \
-    ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 
 # adding a custom bashrc with git branch in PS1
 COPY default-bashrc /etc/skel/.bashrc
@@ -181,10 +225,6 @@ RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 # Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
 RUN printf "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
 
-# Use proxy for https connections, this must happen last
-ENV https_proxy=http://proxy.ssb.no:3128
-ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
-
 # Set Dapla environment variables used to identify the service.
 ENV DAPLA_SERVICE=R_STUDIO
 ENV DAPLA_REGION=ON_PREM
@@ -193,7 +233,63 @@ ENV DAPLA_REGION=ON_PREM
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
+RUN /rocker_scripts/install_verse.sh
+
+RUN /rocker_scripts/install_texlive.sh
+
+# Use proxy for https connections, this must happen last
+ENV https_proxy=http://proxy.ssb.no:3128
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
+
+# Change default R repo (used by renv)
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
+
 EXPOSE 8787
 
 CMD ["/start.sh"]
 
+# COPY scripts/bin/ /rocker_scripts/bin/
+# COPY scripts/setup_R.sh /rocker_scripts/setup_R.sh
+# RUN <<EOF
+# if grep -q "1000" /etc/passwd; then
+#     userdel --remove "$(id -un 1000)";
+# fi
+# /rocker_scripts/setup_R.sh
+# EOF
+
+# COPY scripts/install_tidyverse.sh /rocker_scripts/install_tidyverse.sh
+# RUN /rocker_scripts/install_tidyverse.sh
+
+# ENV S6_VERSION="v2.1.0.2"
+# ENV RSTUDIO_VERSION="2024.12.1+563"
+# ENV DEFAULT_USER="rstudio"
+
+# COPY scripts/install_rstudio.sh /rocker_scripts/install_rstudio.sh
+# COPY scripts/install_s6init.sh /rocker_scripts/install_s6init.sh
+# COPY scripts/default_user.sh /rocker_scripts/default_user.sh
+# COPY scripts/init_set_env.sh /rocker_scripts/init_set_env.sh
+# COPY scripts/init_userconf.sh /rocker_scripts/init_userconf.sh
+# COPY scripts/pam-helper.sh /rocker_scripts/pam-helper.sh
+# RUN /rocker_scripts/install_rstudio.sh
+
+# EXPOSE 8787
+# CMD ["/init"]
+
+# COPY scripts/install_pandoc.sh /rocker_scripts/install_pandoc.sh
+# RUN /rocker_scripts/install_pandoc.sh
+
+# COPY scripts/install_quarto.sh /rocker_scripts/install_quarto.sh
+# RUN /rocker_scripts/install_quarto.sh
+
+# ENV CTAN_REPO="https://www.texlive.info/tlnet-archive/2025/04/10/tlnet"
+# ENV PATH="$PATH:/usr/local/texlive/bin/linux"
+
+# COPY scripts/install_verse.sh /rocker_scripts/install_verse.sh
+# COPY scripts/install_texlive.sh /rocker_scripts/install_texlive.sh
+# RUN /rocker_scripts/install_verse.sh
+
+# COPY scripts/install_geospatial.sh /rocker_scripts/install_geospatial.sh
+# RUN /rocker_scripts/install_geospatial.sh
+
+# COPY scripts /rocker_scripts
