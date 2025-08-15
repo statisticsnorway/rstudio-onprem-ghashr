@@ -26,8 +26,6 @@ WORKDIR ${WORKSPACE_DIR}
 
 USER root
 
-## `../scripts` directory should be added by the --build-context flag like so:
-## docker build --build-context scripts=../scripts <REST>
 COPY scripts/ /opt/
 
 RUN chmod -R +x /opt/ && \
