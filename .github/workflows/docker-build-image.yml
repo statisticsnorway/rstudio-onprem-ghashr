@@ -127,27 +127,15 @@ jobs:
       TEAM_NAME: itinfra-bakkesyst
 
     steps:
-      - name: Determine deploy parameters
-        id: params
-        run: |
-          echo 'target_hosts=["sl-rstudio-p3.ssb.no"]' >> $GITHUB_OUTPUT
-
-      - name: Set repo_name
-        id: repo_name
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY##*/}"
-          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-
-      - name: Trigger AWX deployment
+      - name: Deploy via AWX
         env:
-          AWX_URL: ${{ secrets.AWX_URL }}
           AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
         run: |
-          curl -k -X POST \
-            "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
+          set -euo pipefail
+          REPO_NAME="rstudio-onprem-ghr-test"
+          TARGETS='["sl-rstudio-p3.ssb.no"]'  # JSON array
+
+          curl -k -X POST "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${AWX_TOKEN}" \
-            -d "$(jq -n \
-              --arg repo_name   "${{ steps.repo_name.outputs.repo_name }}" \
-              --argjson target_hosts "${{ steps.params.outputs.target_hosts }}" \
-              '{extra_vars: {repo_name: $repo_name, target_hosts: $target_hosts}}')"
+            --data-raw "{\"extra_vars\":{\"repo_name\":\"${REPO_NAME}\",\"target_hosts\":${TARGETS}}}"
