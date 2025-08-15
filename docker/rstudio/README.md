@@ -1,0 +1,1 @@
+PS C:\Users\paf\rstudio-onprem-ghr-test-2> docker build .\docker\rstudio\ -f docker/rstudio/hei.Dockerfile -t hei.dockerfile --build-context scripts=docker/rstudio/scripts

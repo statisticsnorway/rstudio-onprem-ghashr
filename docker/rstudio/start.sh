@@ -9,7 +9,7 @@ export STATBANK_BASE_URL=$STATBANK_BASE_URL
 export STATBANK_ENCRYPT_URL=$STATBANK_ENCRYPT_URL
 
 # updating CA-certificate before starting RStudio so users can access github
-update-ca-certificates
+# update-ca-certificates
 
 # start cron
 service cron start
