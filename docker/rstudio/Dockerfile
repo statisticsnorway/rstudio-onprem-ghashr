@@ -228,10 +228,6 @@ RUN chmod +x /usr/local/bin/ssb-gitconfig.py
 # Appends ssh-rsa as the accepted algorithm to /etc/ssh/ssh_config
 RUN printf "    PubkeyAcceptedAlgorithms +ssh-rsa\n    HostkeyAlgorithms +ssh-rsa" >> /etc/ssh/ssh_config
 
-# Use proxy for https connections, this must happen last
-ENV https_proxy=http://proxy.ssb.no:3128
-ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
-
 # Set Dapla environment variables used to identify the service.
 ENV DAPLA_SERVICE=R_STUDIO
 ENV DAPLA_REGION=ON_PREM
@@ -243,6 +239,11 @@ RUN chmod +x /start.sh
 RUN /rocker_scripts/install_verse.sh
 
 RUN /rocker_scripts/install_texlive.sh
+
+# Use proxy for https connections, this must happen last
+ENV https_proxy=http://proxy.ssb.no:3128
+ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
+
 
 EXPOSE 8787
 
