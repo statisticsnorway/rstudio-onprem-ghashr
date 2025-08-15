@@ -99,125 +99,67 @@ jobs:
   deploy_staging:
     needs: rstudio-onprem-build
     if: github.ref == 'refs/heads/main'
+    runs-on: pl-ghashr-t1
+    env:
+      IMAGE_NAME: rstudio-onprem
+      TEAM_NAME: itinfra-bakkesyst
+
+    steps:
+      - name: Determine deploy parameters
+        id: params
+        run: |
+          echo "target_hosts=sl-rstudio-t2.ssb.no" >> $GITHUB_OUTPUT
+
+      - name: Set repo_name
+        id: repo_name
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+
+      - name: Trigger AWX deployment
+        env:
+          AWX_URL: ${{ secrets.AWX_URL }}
+          AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
+        run: |
+          curl -k -X POST \
+            "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${AWX_TOKEN}" \
+            -d "$(jq -n \
+              --arg repo_name   "${{ steps.repo_name.outputs.repo_name }}" \
+              --arg target_hosts "${{ steps.params.outputs.target_hosts }}" \
+              '{extra_vars: {repo_name: $repo_name, target_hosts: $target_hosts}}')"
+
+  deploy_prod:
+    needs: rstudio-onprem-build
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: pl-ghashr-t1   #  This is where the GitHub runner is hosted ; *not* the staging host itself
     env:
       IMAGE_NAME: rstudio-onprem
       TEAM_NAME: itinfra-bakkesyst
 
     steps:
-      - name: Deploy to staging via SSH
+      - name: Determine deploy parameters
+        id: params
         run: |
-          set -euo pipefail
+          echo "target_hosts=sl-rstudio-p3.ssb.no" >> $GITHUB_OUTPUT
 
-          # shellcheck disable=SC2029
-          ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no rstudio@sl-rstudio-t2.ssb.no <<'REMOTE'
-            set -euo pipefail
+      - name: Set repo_name
+        id: repo_name
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
 
-            export IMAGE_NAME="rstudio-onprem"
-            export TEAM_NAME="itinfra-bakkesyst"
-            export DOCKER_CONFIG="$HOME/.docker"
-
-            NEXUS_IMAGE="nexus.ssb.no:8439/${GAR_PROJECT_ID}/${TEAM_NAME}-docker/${IMAGE_NAME}:latest"
-
-            echo "Pulling $NEXUS_IMAGE"
-            docker login nexus.ssb.no:8439 -u "$NEXUS_USERNAME" -p "$NEXUS_PASSWORD"
-            docker pull "$NEXUS_IMAGE"
-            docker image prune --force
-
-            REPO="$HOME/rstudio-onprem-ghr-test"
-            if [ ! -d "$REPO" ]; then
-              git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git "$REPO"
-              mkdir -p "$HOME/secrets/statbank-authenticator" "$HOME/cron"
-              chmod 1777 "$HOME/cron"
-            fi
-            cd "$REPO"
-            git stash
-            git pull
-
-            SERVICE_FILE=/etc/systemd/system/rstudio.service
-            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
-              echo "Service files match — restarting service"
-              sudo systemctl restart rstudio.service
-            else
-              echo "Updating service file and starting service"
-              sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
-              sudo systemctl enable rstudio.service
-              sudo systemctl start rstudio.service
-            fi
-          REMOTE
+      - name: Trigger AWX deployment
         env:
-          GAR_PROJECT_ID:  ${{ secrets.GAR_PROJECT_ID }}
-          NEXUS_USERNAME:  ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD:  ${{ secrets.NEXUS_PASSWORD }}
-          SSH_KEY:         ${{ secrets.RSTUDIO_STAGING_SSH_KEY }}   # private key in PEM format
-
-  deploy_prod:
-      needs: rstudio-onprem-build
-      if: startsWith(github.ref, 'refs/tags/')
-      runs-on: sl-rstudio-p3
-      env: 
-        IMAGE_NAME: rstudio-onprem
-        TEAM_NAME: itinfra-bakkesyst
-
-      steps:
-        - name: Set nexusimageName variable
-          run: echo "nexusimageName=nexus.ssb.no:8439/${{ secrets.GAR_PROJECT_ID }}/${{ env.TEAM_NAME }}-docker/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
-
-        - name: Clone and update repo
-          run: |
-            set -ex
-            REPO="$HOME/rstudio-onprem-ghr-test"
-            if ! [ -d "$REPO" ]; then
-                echo "Cloning repo..."
-                git clone https://github.com/statisticsnorway/rstudio-onprem-ghr-test.git $REPO
-                mkdir -p $HOME/secrets/statbank-authenticator
-                mkdir -p $HOME/cron
-                chmod 1777 $HOME/cron
-            fi
-          
-            cd $REPO
-            git stash
-            git pull
-
-        - name: Get latest tag
-          run: |
-            set -ex
-            cd $HOME/rstudio-onprem-ghr-test
-            git tag --sort=-v:refname | head -n 1
-            TAG=`git tag --sort=-v:refname | head -n 1`
-            echo "Found tag $TAG"
-            sed "s/<TAG>/$TAG/g" docker/rstudio/.env.prod > docker/rstudio/.env
-        
-        - name: Set DOCKER_CONFIG variable
-          run: echo "DOCKER_CONFIG=$HOME/.docker" >> $GITHUB_ENV
-
-        - name: Docker Login to Nexus repo
-          run: docker login "nexus.ssb.no:8439" --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
-          env:
-            DOCKER_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-            DOCKER_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        
-        - name: Pull Docker image
-          run: |
-            set -ex
-            IMAGE=${{ env.nexusimageName }}:$TAG
-            echo "Pulling $IMAGE"
-            docker pull $IMAGE
-
-        - name: Remove dangling images
-          run: docker image prune --force
-
-        - name: Deploy Service
-          run: |
-            set -ex
-            REPO="$HOME/rstudio-onprem-ghr-test"
-            SERVICE_FILE=/etc/systemd/system/rstudio.service
-            if cmp -s "$SERVICE_FILE" "$REPO/docker/rstudio/rstudio.service"; then
-                echo "Service files match, restarting service."
-                sudo systemctl restart rstudio.service
-            else
-                echo "Updating service file..."
-                sudo cp "$REPO/docker/rstudio/rstudio.service" "$SERVICE_FILE"
-                sudo systemctl enable rstudio.service
-                sudo systemctl start rstudio.service
-            fi
+          AWX_URL: ${{ secrets.AWX_URL }}
+          AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
+        run: |
+          curl -k -X POST \
+            "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${AWX_TOKEN}" \
+            -d "$(jq -n \
+              --arg repo_name   "${{ steps.repo_name.outputs.repo_name }}" \
+              --arg target_hosts "${{ steps.params.outputs.target_hosts }}" \
+              '{extra_vars: {repo_name: $repo_name, target_hosts: $target_hosts}}')"
