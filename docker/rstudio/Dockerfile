@@ -179,9 +179,6 @@ RUN Rscript /tmp/r-packages-src.R && \
 
 RUN R --no-echo -e 'cat(Sys.getenv("R_HOME"), Sys.getenv("R_LIBS_USER"),"\n");cat(.libPaths(),"\n"); print(installed.packages()[,c("Package", "Version")])'
 
-# Change default R repo (used by renv)
-COPY Rprofile.site /etc/R/Rprofile.site
-COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 # Installing sssd-tools (required for authentication)
 RUN apt update && \
@@ -244,6 +241,9 @@ RUN /rocker_scripts/install_texlive.sh
 ENV https_proxy=http://proxy.ssb.no:3128
 ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
 
+# Change default R repo (used by renv)
+COPY Rprofile.site /etc/R/Rprofile.site
+COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 EXPOSE 8787
 
