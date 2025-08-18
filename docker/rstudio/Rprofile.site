@@ -11,5 +11,5 @@ rm(r)
 if (interactive()) {
   Sys.setenv(R_HISTFILE = "/dev/null")  # Forhindrer lagring av .Rhistory
   options(save.workspace = "no")  # Hindrer lagring av .RData ved avslutning
-  options(load.workspace = false)  # Hindrer lasting av .RData ved oppstart
+  options(load.workspace = FALSE)  # Hindrer lasting av .RData ved oppstart
 }
