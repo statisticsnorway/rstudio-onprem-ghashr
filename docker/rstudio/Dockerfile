@@ -169,10 +169,14 @@ RUN alien -i /tmp/oracle-instantclient-basic-21.6.0.0.0-1.x86_64.rpm && \
 # Copy the ROracle installation file into the container
 COPY ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz /tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz
 
+RUN /rocker_scripts/install_verse.sh
+
+RUN /rocker_scripts/install_texlive.sh
+
 COPY r-packages-src.R /tmp/r-packages-src.R
 
 # Install additional packages from source
-RUN Rscript /tmp/r-packages-src.R && \
+RUN Rscript --vanilla /tmp/r-packages-src.R && \
     rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 RUN R --no-echo -e 'cat(Sys.getenv("R_HOME"), Sys.getenv("R_LIBS_USER"),"\n");cat(.libPaths(),"\n"); print(installed.packages()[,c("Package", "Version")])'
@@ -231,9 +235,21 @@ ENV DAPLA_REGION=ON_PREM
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-RUN /rocker_scripts/install_verse.sh
 
-RUN /rocker_scripts/install_texlive.sh
+# Install Oracle client libraries for ROracle
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libaio1t64 libnsl2 && \
+    # allow old loaders/binaries to find time64 libaio
+    ln -sf /lib/x86_64-linux-gnu/libaio.so.1t64 /lib/x86_64-linux-gnu/libaio.so.1 && \
+    # (optional but nice) include t64 dir in default paths
+    echo '/usr/lib/x86_64-linux-gnu/t64' > /etc/ld.so.conf.d/t64.conf && \
+    # (optional) expose Oracle client libs without LD_LIBRARY_PATH
+    echo '/usr/lib/oracle/21/client64/lib' > /etc/ld.so.conf.d/oracle.conf && \
+    ldconfig && \
+    rm -rf /var/lib/apt/lists/*
+
+
+ENV PATH="${PATH}:/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/bin/linux:/usr/lib/rstudio-server/bin/quarto/bin:/usr/lib/rstudio-server/bin/postback:/usr/bin:/usr/bin"
 
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
