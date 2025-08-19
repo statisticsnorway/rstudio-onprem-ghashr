@@ -249,7 +249,18 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
-ENV PATH="${PATH}:/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/bin/linux:/usr/lib/rstudio-server/bin/quarto/bin:/usr/lib/rstudio-server/bin/postback:/usr/bin:/usr/bin"
+
+ENV PATH="/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/bin/linux:/usr/lib/rstudio-server/bin/quarto/bin:/usr/lib/rstudio-server/bin/postback:/usr/bin:/usr/bin:/usr/local/texlive/bin/x86_64-linux:${PATH}"
+
+# Install the LaTeX packages you need
+RUN set -eux; \
+    /usr/local/texlive/bin/x86_64-linux/tlmgr option repository https://mirror.ctan.org/systems/texlive/tlnet; \
+    /usr/local/texlive/bin/x86_64-linux/tlmgr update --self; \
+    /usr/local/texlive/bin/x86_64-linux/tlmgr install amsfonts booktabs; \
+    # optional: clean up TL backup cache to keep the layer smaller
+    rm -rf /usr/local/texlive/*/tlpkg/backups
+
+
 
 # Use proxy for https connections, this must happen last
 ENV https_proxy=http://proxy.ssb.no:3128
