@@ -260,6 +260,7 @@ RUN set -eux; \
     # optional: clean up TL backup cache to keep the layer smaller
     rm -rf /usr/local/texlive/*/tlpkg/backups
 
+RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
 
 
 # Use proxy for https connections, this must happen last
