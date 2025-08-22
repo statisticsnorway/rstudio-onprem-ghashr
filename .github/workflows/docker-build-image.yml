@@ -113,7 +113,7 @@ jobs:
           REPO_NAME="rstudio-onprem-ghashr"
           TARGETS='["sl-rstudio-t2.ssb.no"]'  # JSON array
 
-          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/283/launch/" \
+          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/307/launch/" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${AWX_TOKEN}" \
             --data-raw "{\"extra_vars\":{\"repo_name\":\"${REPO_NAME}\",\"target_hosts\":${TARGETS}}}"
@@ -135,7 +135,7 @@ jobs:
           REPO_NAME="rstudio-onprem-ghashr"
           TARGETS='["sl-rstudio-p3.ssb.no"]'  # JSON array
 
-          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/283/launch/" \
+          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/307/launch/" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${AWX_TOKEN}" \
             --data-raw "{\"extra_vars\":{\"repo_name\":\"${REPO_NAME}\",\"target_hosts\":${TARGETS}}}"
