@@ -99,7 +99,7 @@ jobs:
   deploy_staging:
     needs: rstudio-onprem-build
     if: github.ref == 'refs/heads/main'
-    runs-on: pl-ghashr-t1
+    runs-on: pl-ghashr-p1
     env:
       IMAGE_NAME: rstudio-onprem
       TEAM_NAME: itinfra-bakkesyst
@@ -110,10 +110,10 @@ jobs:
           AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
         run: |
           set -euo pipefail
-          REPO_NAME="rstudio-onprem-ghr-test"
+          REPO_NAME="rstudio-onprem-ghashr"
           TARGETS='["sl-rstudio-t2.ssb.no"]'  # JSON array
 
-          curl -k -X POST "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
+          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/283/launch/" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${AWX_TOKEN}" \
             --data-raw "{\"extra_vars\":{\"repo_name\":\"${REPO_NAME}\",\"target_hosts\":${TARGETS}}}"
@@ -121,7 +121,7 @@ jobs:
   deploy_prod:
     needs: rstudio-onprem-build
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: pl-ghashr-t1   #  This is where the GitHub runner is hosted ; *not* the staging host itself
+    runs-on: pl-ghashr-p1   #  This is where the GitHub runner is hosted ; *not* the staging host itself
     env:
       IMAGE_NAME: rstudio-onprem
       TEAM_NAME: itinfra-bakkesyst
@@ -132,10 +132,10 @@ jobs:
           AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
         run: |
           set -euo pipefail
-          REPO_NAME="rstudio-onprem-ghr-test"
+          REPO_NAME="rstudio-onprem-ghashr"
           TARGETS='["sl-rstudio-p3.ssb.no"]'  # JSON array
 
-          curl -k -X POST "https://gjallarbru-test.ssb.no/api/v2/job_templates/283/launch/" \
+          curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/283/launch/" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${AWX_TOKEN}" \
             --data-raw "{\"extra_vars\":{\"repo_name\":\"${REPO_NAME}\",\"target_hosts\":${TARGETS}}}"
