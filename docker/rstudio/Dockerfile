@@ -255,7 +255,7 @@ ENV PATH="/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr
 # Install the LaTeX packages you need
 RUN set -eux; \
     /usr/local/texlive/bin/x86_64-linux/tlmgr option repository https://mirror.ctan.org/systems/texlive/tlnet; \
-    /usr/local/texlive/bin/x86_64-linux/tlmgr update --self; \
+    # /usr/local/texlive/bin/x86_64-linux/tlmgr update --self; \
     /usr/local/texlive/bin/x86_64-linux/tlmgr install amsfonts booktabs; \
     # optional: clean up TL backup cache to keep the layer smaller
     rm -rf /usr/local/texlive/*/tlpkg/backups
