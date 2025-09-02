@@ -97,7 +97,7 @@ ENV PANDOC_VERSION=default
 ENV QUARTO_VERSION=default
 
 # LaTeX ENVs
-ENV CTAN_REPO=https://mirror.ctan.org/systems/texlive/tlnet
+ENV CTAN_REPO=https://ctan.uib.no/systems/texlive/tlnet
 ENV PATH=$PATH:/usr/local/texlive/bin/linux
 
 COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
@@ -254,7 +254,7 @@ ENV PATH="/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr
 
 # Install the LaTeX packages you need
 RUN set -eux; \
-    /usr/local/texlive/bin/x86_64-linux/tlmgr option repository https://mirror.ctan.org/systems/texlive/tlnet; \
+    /usr/local/texlive/bin/x86_64-linux/tlmgr option repository "$CTAN_REPO"; \
     # /usr/local/texlive/bin/x86_64-linux/tlmgr update --self; \
     /usr/local/texlive/bin/x86_64-linux/tlmgr install amsfonts booktabs; \
     # optional: clean up TL backup cache to keep the layer smaller
