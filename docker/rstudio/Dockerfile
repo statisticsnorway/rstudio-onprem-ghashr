@@ -267,6 +267,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
 ENV https_proxy=http://proxy.ssb.no:3128
 ENV no_proxy=nexus.ssb.no,git-adm.ssb.no,i.test.ssb.no,i.ssb.no,data.ssb.no,github.com,api.github.com,codeload.github.com,www.ssb.no
 
+RUN git config --system --add safe.directory '*'
+
 # Change default R repo (used by renv)
 COPY Rprofile.site /etc/R/Rprofile.site
 COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
