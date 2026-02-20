@@ -10,26 +10,48 @@ CRAN=https://cloud.r-project.org
 
 : "${ARROW_VERSION:?ARROW_VERSION (e.g. 18.0.0) must be exported}"
 echo "▶  Arrow APT target  : $ARROW_VERSION"
+DISTRO_ID=$(lsb_release -is 2>/dev/null | tr A-Z a-z || true)
+CODENAME=$(lsb_release -cs 2>/dev/null || true)
+if [[ -z "$DISTRO_ID" || -z "$CODENAME" ]]; then
+  if [[ -r /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    DISTRO_ID=${ID:-$DISTRO_ID}
+    CODENAME=${VERSION_CODENAME:-$CODENAME}
+  fi
+fi
+if [[ "$DISTRO_ID" != "ubuntu" ]]; then
+  echo "!! Unsupported distro: ${DISTRO_ID:-unknown} (expected ubuntu)"
+  exit 1
+fi
+echo "    ↪ Ubuntu codename : ${CODENAME:-unknown}"
 
 ############################################################################
 # 1)  Add Arrow APT repo (idempotent)
 ############################################################################
 apt-get update -qq
 apt-get install -y --no-install-recommends ca-certificates lsb-release wget gnupg
-wget -q "https://packages.apache.org/artifactory/arrow/$(lsb_release -is | tr A-Z a-z)/apache-arrow-apt-source-latest-$(lsb_release -cs).deb"
-apt-get install -y ./apache-arrow-apt-source-latest-$(lsb_release -cs).deb
-rm       ./apache-arrow-apt-source-latest-$(lsb_release -cs).deb
+wget -q "https://packages.apache.org/artifactory/arrow/${DISTRO_ID}/apache-arrow-apt-source-latest-${CODENAME}.deb"
+apt-get install -y ./apache-arrow-apt-source-latest-${CODENAME}.deb
+rm       ./apache-arrow-apt-source-latest-${CODENAME}.deb
 apt-get update -qq
 
 ############################################################################
-# 2)  Exact Debian revision, e.g. 18.0.0-1
+# 2)  Resolve APT revisions
 ############################################################################
+LATEST_REV=$(apt-cache madison libarrow-dev | awk -F'|' 'NR==1{gsub(/^ +| +$/, "", $2); print $2; exit}')
+LATEST_VER=${LATEST_REV%-*}
+REQ_SERIES=$(echo "$ARROW_VERSION" | awk -F. '{print $1"."$2}')
+LATEST_SERIES=$(echo "$LATEST_VER" | awk -F. '{print $1"."$2}')
+
 REV=$(apt-cache madison libarrow-dev |
       awk -F'|' -v v="$ARROW_VERSION" '{gsub(/^ +| +$/, "", $2); if($2~("^"v"-")){print $2; exit}}')
-[[ -z $REV ]] && { echo "!! libarrow-dev $ARROW_VERSION not in repo"; exit 1; }
-LATEST_REV=$(apt-cache madison libarrow-dev | awk -F'|' 'NR==1{gsub(/^ +| +$/, "", $2); print $2; exit}')
-echo "    ↪ APT revision    : $REV"
+
 echo "    ↪ APT latest rev  : $LATEST_REV"
+if [[ -n "$REV" ]]; then
+  echo "    ↪ APT revision    : $REV"
+fi
+echo "    ↪ APT series      : $LATEST_SERIES (req $REQ_SERIES)"
 
 ############################################################################
 # 3)  Install Arrow dev libs (latest uses default apt, older uses pinned)
@@ -50,12 +72,13 @@ LATEST_PKGS=(
   libparquet-glib-dev
 )
 
-if [[ "$REV" == "$LATEST_REV" ]]; then
+if [[ "$REQ_SERIES" == "$LATEST_SERIES" ]]; then
   apt-get install -y -V --no-install-recommends "${LATEST_PKGS[@]}"
 else
+  [[ -z $REV ]] && { echo "!! libarrow-dev $ARROW_VERSION not in repo"; exit 1; }
   REQUIRED_PKGS=(
     libarrow-dev libparquet-dev
-    libarrow-dataset-dev libarrow-acero-dev
+    libarrow-dataset-dev libarrow-compute-dev libarrow-acero-dev
     libarrow-flight-dev libarrow-flight-sql-dev
     libgandiva-dev
   )
