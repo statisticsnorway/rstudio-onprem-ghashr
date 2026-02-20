@@ -65,7 +65,7 @@ USER 1000
 RUN /opt/install-gitconfig.sh
 
 # R Config
-ARG R_VERSION="4.4.1"
+ARG R_VERSION="4.4.0"
 ENV R_VERSION=${R_VERSION}
 ENV R_HOME="/usr/local/lib/R"
 ENV DEFAULT_USER="${USERNAME}"
@@ -139,7 +139,7 @@ RUN /opt/install-system-libs.sh && \
 
 
 # Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også "apt-cache madison libarrow-dev"
-ARG ARROW_VERSION="18.1.0"
+ARG ARROW_VERSION="23.0.0"
 ENV ARROW_VERSION=${ARROW_VERSION}
 RUN /opt/install-arrow.sh
 
