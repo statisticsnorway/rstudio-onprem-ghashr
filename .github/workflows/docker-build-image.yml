@@ -133,7 +133,7 @@ jobs:
         run: |
           set -euo pipefail
           REPO_NAME="rstudio-onprem-ghashr"
-          TARGETS='["sl-rstudio-p3.ssb.no"]'  # JSON array
+          TARGETS='["sl-rstudio-p3.ssb.no","sl-rstudio-p4.ssb.no"]'  # JSON array
 
           curl -k -X POST "https://gjallarbru.ssb.no/api/v2/job_templates/307/launch/" \
             -H "Content-Type: application/json" \
