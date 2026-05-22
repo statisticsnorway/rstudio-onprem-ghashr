@@ -62,7 +62,7 @@ ENV LC_ALL=nb_NO.UTF-8
 USER 1000
 
 # Install gitconfig file from kvakk-git-tools
-RUN /opt/install-gitconfig.sh
+# RUN /opt/install-gitconfig.sh
 
 # R Config
 ARG R_VERSION="4.4.0"
