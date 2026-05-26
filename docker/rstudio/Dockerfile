@@ -199,6 +199,7 @@ RUN apt update && \
     apt-get -y install wget && \
     apt-get -y install cron
 
+
 # Added repository for libpoppler-cpp-dev, and installed dependencies for tesseract
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
