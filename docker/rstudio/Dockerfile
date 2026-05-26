@@ -1,4 +1,4 @@
-FROM docker.io/library/ubuntu:noble
+FROM docker.io/library/ubuntu:24.04
 
 # System-wide configuration
 SHELL ["/bin/bash", "-c"]
@@ -128,6 +128,7 @@ RUN /opt/install-system-libs.sh && \
     lintr \
     quarto \
     renv \
+    pkg-config \
     styler && \
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
@@ -139,9 +140,15 @@ RUN /opt/install-system-libs.sh && \
 
 
 # Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også "apt-cache madison libarrow-dev"
-ARG ARROW_VERSION="23.0.0"
+ARG ARROW_VERSION="24.0.0"
 ENV ARROW_VERSION=${ARROW_VERSION}
 RUN /opt/install-arrow.sh
+
+ENV ARROW_HOME="/usr"
+ENV ARROW_USE_PKG_CONFIG="TRUE"
+ENV LIBARROW_BINARY="FALSE"
+ENV LIBARROW_BUILD="FALSE"
+ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
 
 # Setting up environment variables for Oracle
 ENV OCI_INC=/usr/include/oracle/21/client64
