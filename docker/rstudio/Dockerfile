@@ -104,9 +104,9 @@ COPY jwsacruncher-2.2.4.zip /tmp/jwsacruncher-2.2.4.zip
 
 # Set up R (RSPM, OpenBLAS, littler, addtional packages)
 RUN /opt/install-java.sh
-    # Install R
+# Install R
 RUN /rocker_scripts/setup_R.sh
-    # Install RStudio
+# Install RStudio
 RUN /rocker_scripts/install_quarto.sh 
 # Install geospatial packages
 RUN /rocker_scripts/install_tidyverse.sh
@@ -115,7 +115,7 @@ RUN /rocker_scripts/install_geospatial.sh
 RUN /rocker_scripts/install_pandoc.sh
 RUN /rocker_scripts/install_rstudio.sh
 
-    # Re-install system libs that may have been removed by autoremove in rocker scripts
+# Re-install system libs that may have been removed by autoremove in rocker scripts
 RUN /opt/install-system-libs.sh && \
     # Install additional system libs needed by R packages
     /opt/install-system-libs-R.sh && \
@@ -128,7 +128,6 @@ RUN /opt/install-system-libs.sh && \
     lintr \
     quarto \
     renv \
-    pkg-config \
     styler && \
     unzip /tmp/jwsacruncher-2.2.4.zip -d /opt && rm -f /tmp/jwsacruncher-2.2.4.zip && \
     # Create a symlink at /usr/bin so users can call jwsacruncher from anywhere
