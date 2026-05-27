@@ -11,6 +11,7 @@ function apt_install() {
 }
 
 apt_install \
+    cmake \
     libglpk40 \
     libpq-dev \
     libzmq3-dev \
