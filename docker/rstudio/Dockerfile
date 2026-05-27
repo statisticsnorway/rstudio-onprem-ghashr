@@ -119,6 +119,12 @@ RUN /rocker_scripts/install_rstudio.sh
 RUN /opt/install-system-libs.sh && \
     # Install additional system libs needed by R packages
     /opt/install-system-libs-R.sh && \
+    # arrow >= 21 requires cmake >= 3.26 when users install into renv projects
+    CMAKE_VERSION="$(cmake --version | awk 'NR == 1 { print $3 }')" && \
+    if ! dpkg --compare-versions "$CMAKE_VERSION" ge "3.26"; then \
+    echo "cmake >= 3.26 is required for arrow; found $CMAKE_VERSION"; \
+    exit 1; \
+    fi && \
     # Configure R for CUDA if parent image has CUDA
     if ! [[ -z "${CUDA_VERSION}" ]]; then /rocker_scripts/config_R_cuda.sh; fi && \
     # Install useful additional packages
@@ -268,6 +274,8 @@ RUN set -eux; \
     rm -rf /usr/local/texlive/*/tlpkg/backups
 
 RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
+
+RUN locale-gen nb_NO.UTF-8 && update-locale LANG=nb_NO.UTF-8 LC_ALL=nb_NO.UTF-8
 
 
 # Use proxy for https connections, this must happen last
