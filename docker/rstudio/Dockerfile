@@ -87,7 +87,7 @@ RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-ver
     chmod -R 700 /rocker_scripts/ && \
     /rocker_scripts/install_R_source.sh
 
-ENV CRAN="https://p3m.dev/cran/__linux__/noble/latest"
+ENV CRAN="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_VERSION}"
 
 # RStudio ENVs
 ENV S6_VERSION=v2.1.0.2
@@ -119,12 +119,6 @@ RUN /rocker_scripts/install_rstudio.sh
 RUN /opt/install-system-libs.sh && \
     # Install additional system libs needed by R packages
     /opt/install-system-libs-R.sh && \
-    # arrow >= 21 requires cmake >= 3.26 when users install into renv projects
-    CMAKE_VERSION="$(cmake --version | awk 'NR == 1 { print $3 }')" && \
-    if ! dpkg --compare-versions "$CMAKE_VERSION" ge "3.26"; then \
-    echo "cmake >= 3.26 is required for arrow; found $CMAKE_VERSION"; \
-    exit 1; \
-    fi && \
     # Configure R for CUDA if parent image has CUDA
     if ! [[ -z "${CUDA_VERSION}" ]]; then /rocker_scripts/config_R_cuda.sh; fi && \
     # Install useful additional packages
@@ -144,16 +138,10 @@ RUN /opt/install-system-libs.sh && \
     rm -rf /var/lib/apt/lists/*
 
 
-# Install Arrow, og sjekk https://cran.r-project.org/src/contrib/Archive/arrow/ om R-versjonen ligger der. Slik at du treffer riktig versjon. Bruk også "apt-cache madison libarrow-dev"
+# Install Arrow as Posit portable (manylinux_2_28) binary — no system libarrow
 ARG ARROW_VERSION="24.0.0"
 ENV ARROW_VERSION=${ARROW_VERSION}
 RUN /opt/install-arrow.sh
-
-ENV ARROW_HOME="/usr"
-ENV ARROW_USE_PKG_CONFIG="TRUE"
-ENV LIBARROW_BINARY="FALSE"
-ENV LIBARROW_BUILD="FALSE"
-ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
 
 # Setting up environment variables for Oracle
 ENV OCI_INC=/usr/include/oracle/21/client64
