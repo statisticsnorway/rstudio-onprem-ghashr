@@ -90,8 +90,9 @@ RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-ver
     chmod -R 700 /rocker_scripts/ && \
     /rocker_scripts/install_R_source.sh
 
-# P3M manylinux requires major.minor (see R_MINOR) — patch form serves source packages.
-ENV CRAN="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_MINOR}"
+# Rocker tidyverse/geospatial expect Posit __linux__/noble binaries (HTTPUserAgent).
+# Manylinux is used explicitly in install-arrow.sh / r-packages-src.R / Rprofile.site.
+ENV CRAN="https://p3m.dev/cran/__linux__/noble/latest"
 
 # RStudio ENVs
 ENV S6_VERSION=v2.1.0.2
