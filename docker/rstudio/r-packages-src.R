@@ -29,6 +29,21 @@ message("R_VERSION: ", r_ver, " → path: ", r_minor)
 message("Repos: ", paste(getOption("repos"), collapse = ", "))
 message(".libPaths(): ", paste(.libPaths(), collapse = " | "))
 
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes", repos = manylinux, dependencies = hard_deps)
+}
+
+# Deriv 4.3.0 is source-only on P3M and fails to compile on R 4.4 (R_ClosureFormals).
+# 4.2.0 still has a manylinux binary; required via VIM → car → pbkrtest → doBy → Deriv.
+message("Pinning Deriv@4.2.0 (last known manylinux binary)…")
+remotes::install_version(
+  "Deriv",
+  version = "4.2.0",
+  repos = manylinux,
+  dependencies = hard_deps,
+  upgrade = "never"
+)
+
 pkgs <- c(
   "RJDemetra","SmallCountRounding","PxWebApiData","openxlsx","SSBtools","GISSB",
   "GaussSuppression","tinytest","configr","DT","dcmodify","simputation","survey",
@@ -83,9 +98,6 @@ if (length(still_missing)) {
 install.packages("/tmp/ROracle_1.4-1_R_x86_64-unknown-linux-gnu.tar.gz", repos = NULL, type = "source")
 
 # 5) GitHub packages (avoid surprise upgrades of hard deps)
-if (!requireNamespace("remotes", quietly = TRUE)) {
-  install.packages("remotes", repos = manylinux, dependencies = hard_deps)
-}
 gh <- c(
   "statisticsnorway/ssb-pris",
   "statisticsnorway/ssb-kostra",
