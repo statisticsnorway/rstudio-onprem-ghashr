@@ -67,6 +67,9 @@ USER 1000
 # R Config
 ARG R_VERSION="4.4.0"
 ENV R_VERSION=${R_VERSION}
+# P3M manylinux path must be major.minor (4.4), not patch (4.4.0) — else source tarballs are served.
+ARG R_MINOR="4.4"
+ENV R_MINOR=${R_MINOR}
 ENV R_HOME="/usr/local/lib/R"
 ENV DEFAULT_USER="${USERNAME}"
 
@@ -87,7 +90,8 @@ RUN git clone --branch R4.5.0 --depth 1 https://github.com/rocker-org/rocker-ver
     chmod -R 700 /rocker_scripts/ && \
     /rocker_scripts/install_R_source.sh
 
-ENV CRAN="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_VERSION}"
+# P3M manylinux requires major.minor (see R_MINOR) — patch form serves source packages.
+ENV CRAN="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_MINOR}"
 
 # RStudio ENVs
 ENV S6_VERSION=v2.1.0.2

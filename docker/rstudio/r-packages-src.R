@@ -2,10 +2,14 @@
 
 # Build-time install: manylinux portable first, noble binaries as fallback, CRAN last.
 # (GHA cannot rely on Nexus; runtime Rprofile.site points at Nexus mirrors.)
+#
+# P3M manylinux URL must use major.minor (4.4), not patch (4.4.0).
+# Empirically: .../4.4.0/... serves X-Package-Type=source; .../4.4/... serves binary.
 r_ver <- Sys.getenv("R_VERSION", unset = as.character(getRversion()))
+r_minor <- sub("^([0-9]+\\.[0-9]+).*", "\\1", r_ver)
 manylinux <- sprintf(
   "https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/%s",
-  r_ver
+  r_minor
 )
 noble <- c(CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/latest")
 cran  <- c(CRAN = "https://cloud.r-project.org")
@@ -13,7 +17,7 @@ cran  <- c(CRAN = "https://cloud.r-project.org")
 .libPaths(unique(c("/usr/local/lib/R/site-library", .libPaths())))
 options(repos = c(P3M = manylinux, CRAN = noble[["CRAN"]]))
 
-message("R_VERSION: ", r_ver)
+message("R_VERSION: ", r_ver, " → manylinux path: ", r_minor)
 message("Repos: ", paste(getOption("repos"), collapse = ", "))
 message(".libPaths(): ", paste(.libPaths(), collapse = " | "))
 

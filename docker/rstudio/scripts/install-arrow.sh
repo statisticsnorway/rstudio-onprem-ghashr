@@ -8,11 +8,15 @@ set -euo pipefail
 : "${ARROW_VERSION:?ARROW_VERSION (e.g. 24.0.0) must be exported}"
 : "${R_VERSION:?R_VERSION (e.g. 4.4.0) must be exported}"
 
+# P3M manylinux path must be major.minor (4.4), NOT patch (4.4.0).
+# With 4.4.0, P3M returns X-Package-Type=source and packages compile (and fail).
+R_MINOR="${R_VERSION%.*}"
+
 # GHA/build: public P3M (Nexus often unreachable). Runtime users use Nexus via Rprofile.site.
-REPOS="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_VERSION}"
+REPOS="https://packagemanager.posit.co/cran/latest/bin/linux/manylinux_2_28-x86_64/${R_MINOR}"
 
 echo "▶  Arrow portable binary : ${ARROW_VERSION}"
-echo "    ↪ R_VERSION          : ${R_VERSION}"
+echo "    ↪ R_VERSION          : ${R_VERSION} → path ${R_MINOR}"
 echo "    ↪ repos              : ${REPOS}"
 
 Rscript --vanilla -e "install.packages('remotes', repos='${REPOS}', quiet=TRUE)"
