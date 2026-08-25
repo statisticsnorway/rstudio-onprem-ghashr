@@ -22,13 +22,7 @@ echo "    ↪ repos              : ${REPOS}"
 Rscript --vanilla -e "install.packages('remotes', repos='${REPOS}', quiet=TRUE)"
 Rscript --vanilla -e "remotes::install_version('arrow', version='${ARROW_VERSION}', repos='${REPOS}', dependencies=c('Depends','Imports','LinkingTo'), upgrade='never')"
 
-Rscript --vanilla <<'RS'
-caps <- arrow::arrow_info()$capabilities
-print(caps)
-if (is.null(caps) || !any(unlist(caps))) {
-  stop("arrow installed but capabilities are all FALSE / unavailable")
-}
-message("arrow ", as.character(packageVersion("arrow")), " OK")
-RS
+# Assert load + capabilities (avoid heredoc — CRLF-safe in CI)
+Rscript --vanilla -e "caps <- arrow::arrow_info()\$capabilities; print(caps); if (is.null(caps) || !any(unlist(caps))) stop('arrow capabilities all FALSE'); message('arrow ', as.character(packageVersion('arrow')), ' OK')"
 
 echo "✅  arrow ${ARROW_VERSION} (portable manylinux) installed."
