@@ -261,14 +261,14 @@ ENV PATH="/tmp/Rtmp7w5gEN/rstudio/terminal:/tmp/Rtmpd4ibc2/rstudio/terminal:/usr
 # Install the LaTeX packages you need
 RUN set -eux; \
     /usr/local/texlive/bin/x86_64-linux/tlmgr option repository "$CTAN_REPO"; \
-    # /usr/local/texlive/bin/x86_64-linux/tlmgr update --self; \
-    /usr/local/texlive/bin/x86_64-linux/tlmgr install amsfonts booktabs; \
+    /opt/install-texlive-packages.sh; \
     # optional: clean up TL backup cache to keep the layer smaller
     rm -rf /usr/local/texlive/*/tlpkg/backups
 
 RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
 
 RUN locale-gen nb_NO.UTF-8 && update-locale LANG=nb_NO.UTF-8 LC_ALL=nb_NO.UTF-8
+
 
 
 # Use proxy for https connections, this must happen last
